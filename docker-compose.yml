@@ -1,0 +1,41 @@
+services:
+  web:
+    # container_name: web
+    image: valelab-web:latest
+    build:
+      context: .
+      dockerfile: ./apps/web/Dockerfile
+    restart: always
+    environment:
+      - SERVER_URL=http://api:3001/api
+    ports:
+      - 3000:3000
+  api:
+    # container_name: api
+    image: valelab-api:latest
+    user: ${UID}:${GID}
+    build:
+      context: .
+      dockerfile: ./apps/api/Dockerfile
+    restart: always
+    environment:
+      - POSTGRES_URI=postgres://postgres:changeme@db/valelab-db
+      - POSTGRES_PUSH=false
+      - PAYLOAD_SECRET=YOUR_SECRET_HERE
+      - SERVER_URL=localhost:3001
+    ports:
+      - 3001:3001
+    volumes:
+      - ./apps/api/media:/app/apps/api/media
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=valelab-db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=changeme
+      - PGDATA=/data/postgres
+    volumes:
+      - ./postgres:/data/postgres
+    ports:
+      - 5432:5432

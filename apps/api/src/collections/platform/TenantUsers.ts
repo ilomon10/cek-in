@@ -1,9 +1,11 @@
+import { TenantUser, User } from '@/payload-types'
 import type { CollectionConfig } from 'payload'
 
 export const TenantUsers: CollectionConfig = {
   slug: 'tenant-users',
   admin: {
     group: 'Platform',
+    useAsTitle: 'email',
   },
   fields: [
     // Email added by default
@@ -18,6 +20,24 @@ export const TenantUsers: CollectionConfig = {
       name: 'user',
       type: 'relationship',
       relationTo: 'users',
+    },
+
+    {
+      name: 'name',
+      type: 'text',
+      virtual: 'user.name',
+      admin: {
+        readOnly: true,
+      },
+    },
+
+    {
+      name: 'email',
+      type: 'text',
+      virtual: 'user.email',
+      admin: {
+        readOnly: true,
+      },
     },
 
     {

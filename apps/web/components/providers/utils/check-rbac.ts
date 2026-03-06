@@ -10,7 +10,7 @@ type UserRoles = "system-admin" | "admin" | "designer" | "user";
 export function checkRBAC<T = UserRoles>(
   roles: T[],
   allowedRoles: T[],
-  options: RBACOptions = { matchAll: false }
+  options: RBACOptions = { matchAll: false },
 ): boolean {
   const userRoles = roles ?? [];
   if (!userRoles.length) return false;

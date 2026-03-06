@@ -28,7 +28,7 @@ type Item = {
   url: string;
   icon?: LucideIcon;
   isActive?: boolean;
-  can: (roles: string[]) => boolean;
+  can: (role: string) => boolean;
 };
 
 const navMain: Item[] = [
@@ -42,14 +42,14 @@ const navMain: Item[] = [
     title: "Invitations",
     url: "/invitations",
     icon: SquareTerminalIcon,
-    can: (roles: string[]) => !checkRBAC(roles, ["system-admin"]),
+    can: (role: string) => !checkRBAC([role], ["system-admin"]),
   },
   {
     title: "Templates",
     url: "/templates",
     icon: BotIcon,
-    can: (roles: string[]) => {
-      return checkRBAC(roles, ["admin", "designer"]);
+    can: (role: string) => {
+      return checkRBAC([role], ["admin", "designer"]);
     },
   },
 ];
@@ -71,8 +71,8 @@ const navPlatform: Item[] = [
     title: "Users",
     url: "/users",
     icon: Users2Icon,
-    can: (roles: string[]) => {
-      return checkRBAC(roles, ["system-admin", "admin"]);
+    can: (role: string) => {
+      return checkRBAC([role], ["system-admin", "admin"]);
     },
   },
   {
@@ -90,7 +90,7 @@ export function NavMain() {
       <SidebarGroup>
         <SidebarMenu>
           {navMain.map((item) => {
-            const allowed = item.can(user?.roles as string[]);
+            const allowed = item.can(user?.tenantUser?.role as string);
             if (!allowed) return null;
             return <MenuButton key={item.title} item={item} />;
           })}
@@ -101,7 +101,7 @@ export function NavMain() {
         <SidebarGroupLabel>Platform</SidebarGroupLabel>
         <SidebarMenu>
           {navPlatform.map((item) => {
-            const allowed = item.can(user?.roles as string[]);
+            const allowed = item.can(user?.tenantUser?.role as string);
             if (!allowed) return null;
             return <MenuButton key={item.title} item={item} />;
           })}

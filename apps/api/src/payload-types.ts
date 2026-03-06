@@ -90,6 +90,9 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {
+    users: {
+      tenantUsers: 'tenant-users';
+    };
     orders: {
       items: 'order-items';
     };
@@ -304,6 +307,20 @@ export interface User {
     | null;
   isDeleted?: boolean | null;
   deletedAt?: string | null;
+  tenantUser?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  tenantUsers?: {
+    docs?: (number | TenantUser)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
@@ -335,6 +352,8 @@ export interface TenantUser {
   id: number;
   tenant?: (number | null) | Tenant;
   user?: (number | null) | User;
+  name?: string | null;
+  email?: string | null;
   avatarAsset?: (number | null) | Media;
   role?: ('owner' | 'admin' | 'staff' | 'cashier') | null;
   meta?:
@@ -811,6 +830,8 @@ export interface TenantsSelect<T extends boolean = true> {
 export interface TenantUsersSelect<T extends boolean = true> {
   tenant?: T;
   user?: T;
+  name?: T;
+  email?: T;
   avatarAsset?: T;
   role?: T;
   meta?: T;
@@ -829,6 +850,8 @@ export interface UsersSelect<T extends boolean = true> {
   meta?: T;
   isDeleted?: T;
   deletedAt?: T;
+  tenantUser?: T;
+  tenantUsers?: T;
   updatedAt?: T;
   createdAt?: T;
   enableAPIKey?: T;

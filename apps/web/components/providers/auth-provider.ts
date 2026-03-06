@@ -6,7 +6,7 @@ import type {
   CheckResponse,
   OnErrorResponse,
 } from "@refinedev/core";
-import type { User } from "./payload-types";
+import type { TenantUser, User } from "./payload-types";
 import { clientSDK } from "./client-sdk";
 import { useLocalStorage } from "../hooks/use-local-storage";
 import { SERVER_URL } from "../constants";
@@ -40,6 +40,11 @@ type RegisterParams =
   | { provider: "google"; redirectTo: string }
   | { provider: "github"; redirectTo: string };
 
+export type UserIdentity = {
+  user: User;
+  tenantUser?: TenantUser;
+};
+
 export const authProvider = (): AuthProvider => {
   const client = clientSDK();
   const [token, setToken, removeToken] = useLocalStorage("undangon-token", "");
@@ -62,7 +67,7 @@ export const authProvider = (): AuthProvider => {
                 password: params.password,
               },
             },
-            { credentials: "include" }
+            { credentials: "include" },
           )) as LoginResult;
           if (res.errors) {
             result.success = false;
@@ -172,15 +177,15 @@ export const authProvider = (): AuthProvider => {
             {
               collection: "users",
               data: {
+                collection: "users",
                 email: params.email,
                 username: params.username,
                 password: params.password,
-                roles: ["user"],
               },
             },
             {
               credentials: "include",
-            }
+            },
           );
           if (typeof res !== "undefined") {
             result.success = true;
@@ -212,16 +217,33 @@ export const authProvider = (): AuthProvider => {
         success: true,
       };
     },
-    getIdentity: async (params: any): Promise<User> => {
+    getIdentity: async (params: any): Promise<UserIdentity> => {
       await result.check(params);
       const res = await client.me(
         { collection: "users" },
         {
           // headers: { Authorization: `JWT ${token}` },
           credentials: "include",
-        }
+        },
       );
-      return res.user;
+      const resTenantUser = await client.find(
+        {
+          collection: "tenant-users",
+          where: {
+            user: {
+              equals: res.user.id,
+            },
+          },
+        },
+        {
+          // headers: { Authorization: `JWT ${token}` },
+          credentials: "include",
+        },
+      );
+      return {
+        user: res.user,
+        tenantUser: resTenantUser.docs[0],
+      };
     },
   };
   return result;

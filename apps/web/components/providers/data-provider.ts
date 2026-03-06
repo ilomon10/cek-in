@@ -26,7 +26,7 @@ export const dataProvider = (): DataProvider => {
           data: values,
           file,
         },
-        config
+        config,
       );
       return res;
     },
@@ -42,7 +42,7 @@ export const dataProvider = (): DataProvider => {
           data: values,
           file,
         },
-        config
+        config,
       );
       return res;
     },
@@ -53,7 +53,7 @@ export const dataProvider = (): DataProvider => {
           collection: resource,
           id: props.id,
         },
-        config
+        config,
       );
       return { data: res };
     },
@@ -76,7 +76,7 @@ export const dataProvider = (): DataProvider => {
             select: select as any,
             depth,
           },
-          config
+          config,
         );
         result.data = res.docs[0];
       } else {
@@ -87,7 +87,7 @@ export const dataProvider = (): DataProvider => {
             select: select as any,
             depth,
           },
-          config
+          config,
         );
         result.data = res;
       }
@@ -106,7 +106,7 @@ export const dataProvider = (): DataProvider => {
           select: select as any,
           depth,
         },
-        config
+        config,
       );
       return {
         data: res.docs,

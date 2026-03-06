@@ -17,6 +17,7 @@ import {
   useEffect,
 } from "react";
 import { LoadingPage } from "../loading-page";
+import { UserIdentity } from "@/components/providers/auth-provider";
 
 export default function AuthRouteLayout({
   children,
@@ -90,10 +91,12 @@ const Redirect = ({ config }: { config: GoConfig }) => {
   return null;
 };
 
-const UserContext = createContext<{ user: User | null } | undefined>(undefined);
+const UserContext = createContext<{ user: UserIdentity | null } | undefined>(
+  undefined,
+);
 
 const UserContextProvider: FC<PropsWithChildren> = ({ children }) => {
-  const { data: user, isLoading, refetch } = useGetIdentity<User>();
+  const { data: user, isLoading, refetch } = useGetIdentity<UserIdentity>();
 
   // Refetch user identity on mount to ensure fresh state after login
   useEffect(() => {

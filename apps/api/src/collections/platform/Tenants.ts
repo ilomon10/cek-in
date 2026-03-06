@@ -4,6 +4,7 @@ export const Tenants: CollectionConfig = {
   slug: 'tenants',
   admin: {
     group: 'Platform',
+    useAsTitle: 'name',
   },
   fields: [
     {

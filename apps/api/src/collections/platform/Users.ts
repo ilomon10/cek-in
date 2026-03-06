@@ -1,3 +1,4 @@
+import { User } from '@/payload-types'
 import type { CollectionConfig } from 'payload'
 
 export const Users: CollectionConfig = {
@@ -59,6 +60,40 @@ export const Users: CollectionConfig = {
     {
       name: 'deletedAt',
       type: 'date',
+    },
+
+    {
+      name: 'tenantUser',
+      type: 'json',
+      virtual: true,
+      hooks: {
+        afterRead: [
+          async ({ siblingData, req }) => {
+            if (!siblingData.tenantUsers.docs) return null
+            if (!siblingData.tenantUsers.docs[0]) return null
+            const res = await req.payload.find({
+              collection: 'tenant-users',
+              where: {
+                id: {
+                  equals: siblingData.tenantUsers.docs[0].id,
+                },
+              },
+              depth: 0,
+            })
+            if (!res.docs[0]) return null
+            console.log('GET', res.docs[0])
+            return res.docs
+          },
+        ],
+      },
+    },
+
+    {
+      name: 'tenantUsers',
+      type: 'join',
+      collection: 'tenant-users',
+      on: 'user',
+      hidden: true as any,
     },
   ],
 }

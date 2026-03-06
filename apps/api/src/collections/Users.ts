@@ -1,9 +1,9 @@
 import type { CollectionConfig } from 'payload'
-import { canCreatePage, canReadPage } from './Users.access'
 
 export const Users: CollectionConfig = {
   slug: 'users',
   admin: {
+    group: 'Platform',
     useAsTitle: 'email',
     defaultColumns: ['email', 'username', 'avatarAsset', 'roles'],
   },
@@ -13,10 +13,6 @@ export const Users: CollectionConfig = {
       allowEmailLogin: true,
       requireEmail: true,
     },
-  },
-  access: {
-    read: canReadPage,
-    create: canCreatePage,
   },
   fields: [
     // Email added by default
@@ -39,6 +35,19 @@ export const Users: CollectionConfig = {
       type: 'upload',
       relationTo: 'media',
     },
+
+    {
+      name: 'isPlatformAdmin',
+      type: 'checkbox',
+      defaultValue: false,
+    },
+    {
+      name: 'status',
+      type: 'radio',
+      options: ['active', 'suspended'],
+      defaultValue: 'active',
+    },
+
     {
       name: 'meta',
       type: 'json',
@@ -46,19 +55,6 @@ export const Users: CollectionConfig = {
     {
       name: 'isDeleted',
       type: 'checkbox',
-    },
-    {
-      saveToJWT: true,
-      name: 'roles',
-      type: 'select',
-      options: [
-        { label: 'SysAdmin', value: 'system-admin' },
-        { label: 'Admin', value: 'admin' },
-        { label: 'User', value: 'user' },
-        { label: 'Designer', value: 'designer' },
-      ],
-      hasMany: true,
-      defaultValue: ['user'],
     },
     {
       name: 'deletedAt',

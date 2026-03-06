@@ -1,5 +1,6 @@
 // storage-adapter-import-placeholder
 import { postgresAdapter } from '@payloadcms/db-postgres'
+import { sqliteAdapter } from '@payloadcms/db-sqlite'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
@@ -8,18 +9,45 @@ import sharp from 'sharp'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
-import { Teams } from './collections/Teams'
-import { Plans } from './collections/Plans'
-import { Tags } from './collections/Tags'
-import { Templates } from './collections/Templates'
-import { Invitations } from './collections/Invitations'
 import { openapi, scalar } from 'payload-oapi'
 import { isDev, isTest } from './utils/helper'
 import { Config } from './payload-types'
-import ProfilePicture from './components/graphics/profile-picture'
+import { Orders } from './collections/Orders'
+import { OrderItems } from './collections/OrderItems'
+import { Tenants } from './collections/tenants/Tenants'
+import { Products } from './collections/Products'
+import { TentantSubscriptions } from './collections/TenantSubcriptions'
+import { Payments } from './collections/Payments'
+import { Customers } from './collections/Customers'
+import { CheckInLogs } from './collections/CheckInLogs'
+import { Entitlements } from './collections/Entitlements'
+import { Subscriptions } from './collections/membership/Subscriptions'
+import { EventSeats } from './collections/event-seat-management/EventSeats'
+import { SeatReservations } from './collections/event-seat-management/SeatReservations'
+import { Devices } from './collections/management/Devices'
+import { Plans } from './collections/management/Plans'
+import { TenantUsers } from './collections/tenants/TenantUsers'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+const dbAdapter = () => {
+  if (process.env.DATABASE_TYPE === 'sqlite') {
+    return sqliteAdapter({
+      push: process.env.NODE_ENV === 'development' && process.env.SQLITE_PUSH === 'true',
+      client: {
+        url: process.env.SQLITE_URI || '',
+      },
+    })
+  }
+  return postgresAdapter({
+    push: process.env.NODE_ENV === 'development' && process.env.POSTGRES_PUSH === 'true',
+    pool: {
+      connectionString: process.env.POSTGRES_URI || '',
+    },
+  })
+}
+
 export default buildConfig({
   telemetry: false,
   admin: {
@@ -29,19 +57,37 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Teams, Plans, Tags, Templates, Invitations],
+  collections: [
+    Plans,
+    TentantSubscriptions,
+    Tenants,
+    TenantUsers,
+
+    Users,
+    Customers,
+
+    Media,
+
+    Devices,
+    Products,
+    Orders,
+    OrderItems,
+    Entitlements,
+    CheckInLogs,
+    Payments,
+    Subscriptions,
+
+    // EventSeatManagement
+    EventSeats,
+    SeatReservations,
+  ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
     declare: false,
   },
-  db: postgresAdapter({
-    push: process.env.NODE_ENV === 'development' && process.env.POSTGRES_PUSH === 'true',
-    pool: {
-      connectionString: process.env.POSTGRES_URI || '',
-    },
-  }),
+  db: dbAdapter(),
   sharp: sharp as any,
   plugins: [
     // storage-adapter-placeholder

@@ -1,11 +1,9 @@
 import type { CollectionConfig } from 'payload'
-import { canReadPage } from './Media.access'
-import { beforeOperationHook } from './Media.hooks'
 
 export const Media: CollectionConfig = {
   slug: 'media',
-  access: {
-    read: canReadPage,
+  admin: {
+    group: 'Platform',
   },
   upload: {
     staticDir: 'media',
@@ -48,14 +46,5 @@ export const Media: CollectionConfig = {
         return req.user?.id || user?.id
       },
     },
-    {
-      name: 'tags',
-      type: 'relationship',
-      relationTo: 'tags',
-      hasMany: true,
-    },
   ],
-  hooks: {
-    beforeOperation: [beforeOperationHook],
-  },
 }

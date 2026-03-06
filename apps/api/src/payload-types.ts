@@ -67,26 +67,52 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    users: User;
-    media: Media;
-    teams: Team;
     plans: Plan;
-    tags: Tag;
-    templates: Template;
-    invitations: Invitation;
+    'tentant-subscriptions': TentantSubscription;
+    tenants: Tenant;
+    'tenant-users': TenantUser;
+    users: User;
+    customers: Customer;
+    media: Media;
+    devices: Device;
+    products: Product;
+    orders: Order;
+    'order-items': OrderItem;
+    entitlements: Entitlement;
+    'checkin-logs': CheckinLog;
+    payments: Payment;
+    subscriptions: Subscription;
+    'event-seats': EventSeat;
+    'seat-reservations': SeatReservation;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    orders: {
+      items: 'order-items';
+    };
+  };
   collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
-    media: MediaSelect<false> | MediaSelect<true>;
-    teams: TeamsSelect<false> | TeamsSelect<true>;
     plans: PlansSelect<false> | PlansSelect<true>;
-    tags: TagsSelect<false> | TagsSelect<true>;
-    templates: TemplatesSelect<false> | TemplatesSelect<true>;
-    invitations: InvitationsSelect<false> | InvitationsSelect<true>;
+    'tentant-subscriptions': TentantSubscriptionsSelect<false> | TentantSubscriptionsSelect<true>;
+    tenants: TenantsSelect<false> | TenantsSelect<true>;
+    'tenant-users': TenantUsersSelect<false> | TenantUsersSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
+    customers: CustomersSelect<false> | CustomersSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
+    devices: DevicesSelect<false> | DevicesSelect<true>;
+    products: ProductsSelect<false> | ProductsSelect<true>;
+    orders: OrdersSelect<false> | OrdersSelect<true>;
+    'order-items': OrderItemsSelect<false> | OrderItemsSelect<true>;
+    entitlements: EntitlementsSelect<false> | EntitlementsSelect<true>;
+    'checkin-logs': CheckinLogsSelect<false> | CheckinLogsSelect<true>;
+    payments: PaymentsSelect<false> | PaymentsSelect<true>;
+    subscriptions: SubscriptionsSelect<false> | SubscriptionsSelect<true>;
+    'event-seats': EventSeatsSelect<false> | EventSeatsSelect<true>;
+    'seat-reservations': SeatReservationsSelect<false> | SeatReservationsSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -94,12 +120,14 @@ export interface Config {
   db: {
     defaultIDType: number;
   };
+  fallbackLocale: null;
   globals: {};
   globalsSelect: {};
   locale: null;
-  user: User & {
-    collection: 'users';
+  widgets: {
+    collections: CollectionsWidget;
   };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -137,12 +165,64 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
+ * via the `definition` "plans".
  */
-export interface User {
+export interface Plan {
   id: number;
   name?: string | null;
-  avatarAsset?: (number | null) | Media;
+  price?: number | null;
+  maxStaff?: number | null;
+  maxProducts?: number | null;
+  maxCheckinsPerMonth?: number | null;
+  features?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tentant-subscriptions".
+ */
+export interface TentantSubscription {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  planName: string;
+  maxMembers?: number | null;
+  maxEvents?: number | null;
+  maxStaff?: number | null;
+  price?: number | null;
+  status?: string | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tenants".
+ */
+export interface Tenant {
+  id: number;
+  name?: string | null;
+  slug?: string | null;
+  status?: ('active' | 'suspended' | 'trial') | null;
+  plan?: (number | null) | Plan;
+  logoAsset?: (number | null) | Media;
+  subscription_plan?: string | null;
   meta?:
     | {
         [k: string]: unknown;
@@ -153,29 +233,9 @@ export interface User {
     | boolean
     | null;
   isDeleted?: boolean | null;
-  roles?: ('system-admin' | 'admin' | 'user' | 'designer')[] | null;
   deletedAt?: string | null;
   updatedAt: string;
   createdAt: string;
-  enableAPIKey?: boolean | null;
-  apiKey?: string | null;
-  apiKeyIndex?: string | null;
-  email: string;
-  username: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -185,7 +245,6 @@ export interface Media {
   id: number;
   alt: string;
   owner?: (number | null) | User;
-  tags?: (number | Tag)[] | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -226,77 +285,135 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tags".
+ * via the `definition` "users".
  */
-export interface Tag {
+export interface User {
   id: number;
-  name: string;
-  slug: string;
+  name?: string | null;
+  avatarAsset?: (number | null) | Media;
+  isPlatformAdmin?: boolean | null;
+  status?: ('active' | 'suspended') | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  isDeleted?: boolean | null;
+  deletedAt?: string | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "teams".
- */
-export interface Team {
-  id: number;
-  name: string;
-  members?:
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  email: string;
+  username: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
     | {
-        role?: ('owner' | 'member')[] | null;
-        member?: (number | null) | User;
-        id?: string | null;
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
       }[]
     | null;
+  password?: string | null;
+  collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tenant-users".
+ */
+export interface TenantUser {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  user?: (number | null) | User;
+  avatarAsset?: (number | null) | Media;
+  role?: ('owner' | 'admin' | 'staff' | 'cashier') | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "plans".
+ * via the `definition` "customers".
  */
-export interface Plan {
+export interface Customer {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  name: string;
+  email?: string | null;
+  phone?: string | null;
+  gender?: string | null;
+  birth_date?: string | null;
+  avatarAsset?: (number | null) | Media;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "devices".
+ */
+export interface Device {
   id: number;
   name: string;
-  slug: string;
-  features:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  priceCents?: number | null;
+  deviceType: 'qr_scanner' | 'gate' | 'tablet';
+  apiKey: string;
+  lastSeen?: string | null;
+  status?: string | null;
+  owner?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products".
+ */
+export interface Product {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  name: string;
+  descriptions?: string | null;
+  productType?: ('membership' | 'event' | 'package') | null;
+  price?: string | null;
   currency?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "templates".
- */
-export interface Template {
-  id: number;
-  title: string;
-  description?: string | null;
-  slug?: string | null;
-  visibility?: ('private' | 'public' | 'unlisted') | null;
-  coverAsset?: (number | null) | Media;
+  isActive?: boolean | null;
+  config?: {
+    duration_days?: number | null;
+    visit_limit?: number | null;
+    recurring?: boolean | null;
+    grace_period_days?: number | null;
+    event_start?: string | null;
+    event_end?: string | null;
+    venue?: string | null;
+    seat_required?: boolean | null;
+    expiry_days?: number | null;
+  };
   thumbnailAsset?: (number | null) | Media;
-  assets?: (number | Media)[] | null;
-  data?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
   meta?:
     | {
         [k: string]: unknown;
@@ -306,30 +423,25 @@ export interface Template {
     | number
     | boolean
     | null;
-  tags?: (number | Tag)[] | null;
-  owner?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "invitations".
+ * via the `definition` "orders".
  */
-export interface Invitation {
+export interface Order {
   id: number;
-  title: string;
-  slug?: string | null;
-  assets?: (number | Media)[] | null;
-  thumbnailAsset?: (number | null) | Media;
-  data?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
+  tenant: number | Tenant;
+  customer: number | Customer;
+  items?: {
+    docs?: (number | OrderItem)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  invoiceNumber: string;
+  totalAmount?: number | null;
+  status?: ('pending' | 'paid' | 'cancelled' | 'refunded') | null;
   meta?:
     | {
         [k: string]: unknown;
@@ -339,11 +451,194 @@ export interface Invitation {
     | number
     | boolean
     | null;
-  tags?: (number | Tag)[] | null;
-  owner?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
-  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "order-items".
+ */
+export interface OrderItem {
+  id: number;
+  order: number | Order;
+  product: number | Product;
+  quantity?: number | null;
+  price?: number | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "entitlements".
+ */
+export interface Entitlement {
+  id: number;
+  tentant: number | Tenant;
+  customer: number | Customer;
+  product: number | Product;
+  orderItem: number | OrderItem;
+  startAt?: string | null;
+  endAt?: string | null;
+  remainingQuota?: number | null;
+  status: 'active' | 'expired' | 'used_up' | 'cancelled';
+  qrCode?: string | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "checkin-logs".
+ */
+export interface CheckinLog {
+  id: number;
+  tentant: number | Tenant;
+  customer: number | Customer;
+  entitlement: number | Entitlement;
+  location?: string | null;
+  deviceId?: string | null;
+  status: 'success' | 'rejected';
+  note?: string | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payments".
+ */
+export interface Payment {
+  id: number;
+  order: number | Order;
+  method: 'cash' | 'transfer';
+  amount?: number | null;
+  price?: number | null;
+  status: 'paid' | 'waiting' | 'cancelled';
+  paidAt?: string | null;
+  referenceNumber?: string | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subscriptions".
+ */
+export interface Subscription {
+  id: number;
+  tentant: number | Tenant;
+  customer: number | Customer;
+  product: number | Product;
+  nextBillingDate?: string | null;
+  status: 'active' | 'paused' | 'cancelled';
+  paymentMethod?: string | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "event-seats".
+ */
+export interface EventSeat {
+  id: number;
+  tentant: number | Tenant;
+  product: number | Product;
+  seatCode?: string | null;
+  section?: string | null;
+  status: 'available' | 'reserved' | 'sold';
+  note?: string | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "seat-reservations".
+ */
+export interface SeatReservation {
+  id: number;
+  tentant: number | Tenant;
+  seat: number | EventSeat;
+  order: number | Order;
+  status?: string | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: number;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -353,32 +648,72 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
+        relationTo: 'plans';
+        value: number | Plan;
+      } | null)
+    | ({
+        relationTo: 'tentant-subscriptions';
+        value: number | TentantSubscription;
+      } | null)
+    | ({
+        relationTo: 'tenants';
+        value: number | Tenant;
+      } | null)
+    | ({
+        relationTo: 'tenant-users';
+        value: number | TenantUser;
+      } | null)
+    | ({
         relationTo: 'users';
         value: number | User;
+      } | null)
+    | ({
+        relationTo: 'customers';
+        value: number | Customer;
       } | null)
     | ({
         relationTo: 'media';
         value: number | Media;
       } | null)
     | ({
-        relationTo: 'teams';
-        value: number | Team;
+        relationTo: 'devices';
+        value: number | Device;
       } | null)
     | ({
-        relationTo: 'plans';
-        value: number | Plan;
+        relationTo: 'products';
+        value: number | Product;
       } | null)
     | ({
-        relationTo: 'tags';
-        value: number | Tag;
+        relationTo: 'orders';
+        value: number | Order;
       } | null)
     | ({
-        relationTo: 'templates';
-        value: number | Template;
+        relationTo: 'order-items';
+        value: number | OrderItem;
       } | null)
     | ({
-        relationTo: 'invitations';
-        value: number | Invitation;
+        relationTo: 'entitlements';
+        value: number | Entitlement;
+      } | null)
+    | ({
+        relationTo: 'checkin-logs';
+        value: number | CheckinLog;
+      } | null)
+    | ({
+        relationTo: 'payments';
+        value: number | Payment;
+      } | null)
+    | ({
+        relationTo: 'subscriptions';
+        value: number | Subscription;
+      } | null)
+    | ({
+        relationTo: 'event-seats';
+        value: number | EventSeat;
+      } | null)
+    | ({
+        relationTo: 'seat-reservations';
+        value: number | SeatReservation;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -424,14 +759,75 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "plans_select".
+ */
+export interface PlansSelect<T extends boolean = true> {
+  name?: T;
+  price?: T;
+  maxStaff?: T;
+  maxProducts?: T;
+  maxCheckinsPerMonth?: T;
+  features?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tentant-subscriptions_select".
+ */
+export interface TentantSubscriptionsSelect<T extends boolean = true> {
+  tenant?: T;
+  planName?: T;
+  maxMembers?: T;
+  maxEvents?: T;
+  maxStaff?: T;
+  price?: T;
+  status?: T;
+  meta?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tenants_select".
+ */
+export interface TenantsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  status?: T;
+  plan?: T;
+  logoAsset?: T;
+  subscription_plan?: T;
+  meta?: T;
+  isDeleted?: T;
+  deletedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tenant-users_select".
+ */
+export interface TenantUsersSelect<T extends boolean = true> {
+  tenant?: T;
+  user?: T;
+  avatarAsset?: T;
+  role?: T;
+  meta?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
   avatarAsset?: T;
+  isPlatformAdmin?: T;
+  status?: T;
   meta?: T;
   isDeleted?: T;
-  roles?: T;
   deletedAt?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -456,12 +852,27 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customers_select".
+ */
+export interface CustomersSelect<T extends boolean = true> {
+  tenant?: T;
+  name?: T;
+  email?: T;
+  phone?: T;
+  gender?: T;
+  birth_date?: T;
+  avatarAsset?: T;
+  meta?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   owner?: T;
-  tags?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -510,79 +921,176 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "teams_select".
+ * via the `definition` "devices_select".
  */
-export interface TeamsSelect<T extends boolean = true> {
+export interface DevicesSelect<T extends boolean = true> {
   name?: T;
-  members?:
+  deviceType?: T;
+  apiKey?: T;
+  lastSeen?: T;
+  status?: T;
+  owner?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products_select".
+ */
+export interface ProductsSelect<T extends boolean = true> {
+  tenant?: T;
+  name?: T;
+  descriptions?: T;
+  productType?: T;
+  price?: T;
+  currency?: T;
+  isActive?: T;
+  config?:
     | T
     | {
-        role?: T;
-        member?: T;
-        id?: T;
+        duration_days?: T;
+        visit_limit?: T;
+        recurring?: T;
+        grace_period_days?: T;
+        event_start?: T;
+        event_end?: T;
+        venue?: T;
+        seat_required?: T;
+        expiry_days?: T;
       };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "plans_select".
- */
-export interface PlansSelect<T extends boolean = true> {
-  name?: T;
-  slug?: T;
-  features?: T;
-  priceCents?: T;
-  currency?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tags_select".
- */
-export interface TagsSelect<T extends boolean = true> {
-  name?: T;
-  slug?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "templates_select".
- */
-export interface TemplatesSelect<T extends boolean = true> {
-  title?: T;
-  description?: T;
-  slug?: T;
-  visibility?: T;
-  coverAsset?: T;
   thumbnailAsset?: T;
-  assets?: T;
-  data?: T;
   meta?: T;
-  tags?: T;
-  owner?: T;
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "invitations_select".
+ * via the `definition` "orders_select".
  */
-export interface InvitationsSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  assets?: T;
-  thumbnailAsset?: T;
-  data?: T;
+export interface OrdersSelect<T extends boolean = true> {
+  tenant?: T;
+  customer?: T;
+  items?: T;
+  invoiceNumber?: T;
+  totalAmount?: T;
+  status?: T;
   meta?: T;
-  tags?: T;
-  owner?: T;
   updatedAt?: T;
   createdAt?: T;
-  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "order-items_select".
+ */
+export interface OrderItemsSelect<T extends boolean = true> {
+  order?: T;
+  product?: T;
+  quantity?: T;
+  price?: T;
+  meta?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "entitlements_select".
+ */
+export interface EntitlementsSelect<T extends boolean = true> {
+  tentant?: T;
+  customer?: T;
+  product?: T;
+  orderItem?: T;
+  startAt?: T;
+  endAt?: T;
+  remainingQuota?: T;
+  status?: T;
+  qrCode?: T;
+  meta?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "checkin-logs_select".
+ */
+export interface CheckinLogsSelect<T extends boolean = true> {
+  tentant?: T;
+  customer?: T;
+  entitlement?: T;
+  location?: T;
+  deviceId?: T;
+  status?: T;
+  note?: T;
+  meta?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payments_select".
+ */
+export interface PaymentsSelect<T extends boolean = true> {
+  order?: T;
+  method?: T;
+  amount?: T;
+  price?: T;
+  status?: T;
+  paidAt?: T;
+  referenceNumber?: T;
+  meta?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subscriptions_select".
+ */
+export interface SubscriptionsSelect<T extends boolean = true> {
+  tentant?: T;
+  customer?: T;
+  product?: T;
+  nextBillingDate?: T;
+  status?: T;
+  paymentMethod?: T;
+  meta?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "event-seats_select".
+ */
+export interface EventSeatsSelect<T extends boolean = true> {
+  tentant?: T;
+  product?: T;
+  seatCode?: T;
+  section?: T;
+  status?: T;
+  note?: T;
+  meta?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "seat-reservations_select".
+ */
+export interface SeatReservationsSelect<T extends boolean = true> {
+  tentant?: T;
+  seat?: T;
+  order?: T;
+  status?: T;
+  meta?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -615,6 +1123,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

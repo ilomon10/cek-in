@@ -37,6 +37,7 @@ export const Orders: CollectionConfig = {
       name: 'status',
       type: 'radio',
       options: ['pending', 'paid', 'cancelled', 'refunded'],
+      defaultValue: 'pending',
     },
 
     {

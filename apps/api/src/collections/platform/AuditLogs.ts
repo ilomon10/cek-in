@@ -1,37 +1,33 @@
 import type { CollectionConfig } from 'payload'
 
-export const Devices: CollectionConfig = {
-  slug: 'devices',
+export const AuditLogs: CollectionConfig = {
+  slug: 'audit-logs',
   admin: {
     group: 'Platform',
   },
   fields: [
     {
-      name: 'name',
+      name: 'tenant',
+      type: 'relationship',
+      relationTo: 'tenants',
+    },
+    {
+      name: 'action',
       type: 'text',
       required: true,
     },
     {
-      name: 'deviceType',
-      type: 'radio',
-      options: ['qr_scanner', 'gate', 'tablet'],
-      required: true,
-    },
-    {
-      name: 'apiKey',
+      name: 'entityType',
       type: 'text',
       required: true,
     },
     {
-      name: 'lastSeen',
-      type: 'date',
-    },
-    {
-      name: 'status',
+      name: 'entityId',
       type: 'text',
+      required: true,
     },
     {
-      name: 'owner',
+      name: 'user',
       type: 'relationship',
       relationTo: 'users',
       required: false,

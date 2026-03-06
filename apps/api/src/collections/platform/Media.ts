@@ -37,7 +37,7 @@ export const Media: CollectionConfig = {
       required: true,
     },
     {
-      name: 'owner',
+      name: 'user',
       type: 'relationship',
       relationTo: 'users',
       required: false,

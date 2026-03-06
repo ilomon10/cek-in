@@ -2,6 +2,9 @@ import type { CollectionConfig } from 'payload'
 
 export const TentantSubscriptions: CollectionConfig = {
   slug: 'tentant-subscriptions',
+  admin: {
+    group: 'Platform',
+  },
   fields: [
     {
       name: 'tenant',

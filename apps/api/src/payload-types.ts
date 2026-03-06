@@ -244,7 +244,7 @@ export interface Tenant {
 export interface Media {
   id: number;
   alt: string;
-  owner?: (number | null) | User;
+  user?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -385,7 +385,7 @@ export interface Device {
   apiKey: string;
   lastSeen?: string | null;
   status?: string | null;
-  owner?: (number | null) | User;
+  user?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -872,7 +872,7 @@ export interface CustomersSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
-  owner?: T;
+  user?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -929,7 +929,7 @@ export interface DevicesSelect<T extends boolean = true> {
   apiKey?: T;
   lastSeen?: T;
   status?: T;
-  owner?: T;
+  user?: T;
   updatedAt?: T;
   createdAt?: T;
 }

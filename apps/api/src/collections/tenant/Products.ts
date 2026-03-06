@@ -21,7 +21,11 @@ export const Products: CollectionConfig = {
     {
       name: 'productType',
       type: 'radio',
-      options: ['membership', 'event', 'package'],
+      options: [
+        { label: 'Membership', value: 'membership' },
+        { label: 'Event', value: 'event' },
+        { label: 'Package', value: 'package' },
+      ],
     },
     {
       name: 'price',

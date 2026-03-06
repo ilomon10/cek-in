@@ -33,7 +33,11 @@ export const Subscriptions: CollectionConfig = {
     {
       name: 'status',
       type: 'radio',
-      options: ['active', 'paused', 'cancelled'],
+      options: [
+        { label: 'Active', value: 'active' },
+        { label: 'Paused', value: 'paused' },
+        { label: 'Cancelled', value: 'cancelled' },
+      ],
       required: true,
       defaultValue: 'active',
     },

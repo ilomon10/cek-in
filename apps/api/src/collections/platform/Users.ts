@@ -45,7 +45,10 @@ export const Users: CollectionConfig = {
     {
       name: 'status',
       type: 'radio',
-      options: ['active', 'suspended'],
+      options: [
+        { label: 'Active', value: 'active' },
+        { label: 'Suspended', value: 'suspended' },
+      ],
       defaultValue: 'active',
     },
 
@@ -69,18 +72,18 @@ export const Users: CollectionConfig = {
       hooks: {
         afterRead: [
           async ({ siblingData, req }) => {
-            if (!siblingData.tenantUsers.docs) return null
-            if (!siblingData.tenantUsers.docs[0]) return null
+            if (!siblingData?.tenantUsers?.docs) return null
+            if (!siblingData?.tenantUsers?.docs?.[0]) return null
             const res = await req.payload.find({
               collection: 'tenant-users',
               where: {
                 id: {
-                  equals: siblingData.tenantUsers.docs[0].id,
+                  equals: siblingData.tenantUsers.docs?.[0].id,
                 },
               },
               depth: 0,
             })
-            if (!res.docs[0]) return null
+            if (res && !res.docs?.[0]) return null
             console.log('GET', res.docs[0])
             return res.docs
           },

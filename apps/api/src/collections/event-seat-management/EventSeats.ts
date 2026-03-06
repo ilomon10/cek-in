@@ -32,9 +32,13 @@ export const EventSeats: CollectionConfig = {
     {
       name: 'status',
       type: 'radio',
-      options: ['available', 'reserved', 'sold'],
+      options: [
+        { label: 'Available', value: 'available' },
+        { label: 'reserved', value: 'reserved' },
+        { label: 'Sold', value: 'sold' },
+      ],
       required: true,
-      defaultValue: 'active',
+      defaultValue: 'available',
     },
 
     {

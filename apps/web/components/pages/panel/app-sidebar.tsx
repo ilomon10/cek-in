@@ -25,7 +25,11 @@ import {
   SidebarRail,
 } from "@repo/ui/components/ui/sidebar";
 import { useApiUrl } from "@refinedev/core";
-import { Media, Team } from "@/components/providers/payload-types";
+import {
+  Media,
+  Tenant,
+  TenantUser,
+} from "@/components/providers/payload-types";
 import { useUser } from "./auth-route";
 import { checkRBAC } from "@/components/providers/utils/check-rbac";
 import {
@@ -39,17 +43,17 @@ type User = {
   name: string;
   email: string;
   avatar: string;
-  roles: string[];
+  role: string;
 };
 
 // This is sample data.
 const menu = ({
   user,
-  teams,
+  tenants,
   roles,
 }: {
   user: User;
-  teams: Team[];
+  tenants: Tenant[];
   roles: string[];
 }) => {
   const navTeams = [
@@ -116,7 +120,7 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
     return {
       name: userCtx.name || userCtx.username,
       email: userCtx.email as string,
-      roles: userCtx.roles as string[],
+      role: (userCtx.tenantUser as unknown as TenantUser).role,
       avatar:
         (avatarAsset && `${url.origin}${avatarAsset.thumbnailURL}`) ||
         "https://placehold.co/64x64",
@@ -126,8 +130,8 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
     if (!user) return {};
     return menu({
       user: user,
-      teams: [],
-      roles: user.roles as string[],
+      tenants: [],
+      roles: [user.role],
     });
   }, [user]);
   return (

@@ -46,7 +46,12 @@ export const Entitlements: CollectionConfig = {
     {
       name: 'status',
       type: 'radio',
-      options: ['active', 'expired', 'used_up', 'cancelled'],
+      options: [
+        { label: 'Active', value: 'active' },
+        { label: 'Expired', value: 'expired' },
+        { label: 'Used Up', value: 'used_up' },
+        { label: 'Cancelled', value: 'cancelled' },
+      ],
       required: true,
       defaultValue: 'active',
     },

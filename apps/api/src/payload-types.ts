@@ -355,7 +355,7 @@ export interface TenantUser {
   name?: string | null;
   email?: string | null;
   avatarAsset?: (number | null) | Media;
-  role?: ('owner' | 'admin' | 'staff' | 'cashier') | null;
+  role: 'owner' | 'admin' | 'staff' | 'cashier';
   meta?:
     | {
         [k: string]: unknown;

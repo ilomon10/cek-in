@@ -14,7 +14,11 @@ export const Devices: CollectionConfig = {
     {
       name: 'deviceType',
       type: 'radio',
-      options: ['qr_scanner', 'gate', 'tablet'],
+      options: [
+        { label: 'QR Scanner', value: 'qr_scanner' },
+        { label: 'Gate', value: 'gate' },
+        { label: 'Tablet', value: 'tablet' },
+      ],
       required: true,
     },
     {

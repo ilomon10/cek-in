@@ -1,4 +1,3 @@
-import { TenantUser, User } from '@/payload-types'
 import type { CollectionConfig } from 'payload'
 
 export const TenantUsers: CollectionConfig = {
@@ -57,7 +56,8 @@ export const TenantUsers: CollectionConfig = {
         { label: 'Staff', value: 'staff' },
         { label: 'Cashier', value: 'cashier' },
       ],
-      defaultValue: 'member',
+      required: true,
+      defaultValue: 'staff',
     },
 
     {

@@ -16,7 +16,10 @@ export const Payments: CollectionConfig = {
     {
       name: 'method',
       type: 'radio',
-      options: ['cash', 'transfer'],
+      options: [
+        { label: 'Cash', value: 'cash' },
+        { label: 'Transfer', value: 'transfer' },
+      ],
       required: true,
       defaultValue: 'cash',
     },
@@ -34,7 +37,11 @@ export const Payments: CollectionConfig = {
     {
       name: 'status',
       type: 'radio',
-      options: ['paid', 'waiting', 'cancelled'],
+      options: [
+        { label: 'Paid', value: 'paid' },
+        { label: 'Waiting', value: 'waiting' },
+        { label: 'Cancelled', value: 'cancelled' },
+      ],
       required: true,
       defaultValue: 'waiting',
     },

@@ -20,18 +20,9 @@ export const Tenants: CollectionConfig = {
       name: 'status',
       type: 'radio',
       options: [
-        {
-          label: 'Active',
-          value: 'active',
-        },
-        {
-          label: 'Suspended',
-          value: 'suspended',
-        },
-        {
-          label: 'Trial',
-          value: 'trial',
-        },
+        { label: 'Active', value: 'active' },
+        { label: 'Suspended', value: 'suspended' },
+        { label: 'Trial', value: 'trial' },
       ],
     },
     {

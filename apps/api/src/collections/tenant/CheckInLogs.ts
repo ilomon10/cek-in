@@ -35,9 +35,12 @@ export const CheckInLogs: CollectionConfig = {
     {
       name: 'status',
       type: 'radio',
-      options: ['success', 'rejected'],
+      options: [
+        { label: 'Success', value: 'success' },
+        { label: 'Rejected', value: 'rejected' },
+      ],
       required: true,
-      defaultValue: 'active',
+      defaultValue: 'success',
     },
 
     {

@@ -91,12 +91,10 @@ const Redirect = ({ config }: { config: GoConfig }) => {
   return null;
 };
 
-const UserContext = createContext<{ user: UserIdentity | null } | undefined>(
-  undefined,
-);
+const UserContext = createContext<{ user: User | null } | undefined>(undefined);
 
 const UserContextProvider: FC<PropsWithChildren> = ({ children }) => {
-  const { data: user, isLoading, refetch } = useGetIdentity<UserIdentity>();
+  const { data: user, isLoading, refetch } = useGetIdentity<User>();
 
   // Refetch user identity on mount to ensure fresh state after login
   useEffect(() => {

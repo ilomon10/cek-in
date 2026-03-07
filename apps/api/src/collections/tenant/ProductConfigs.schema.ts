@@ -4,19 +4,14 @@ export const productConfigsJSONSchema: JSONField['jsonSchema'] = {
   uri: 'a://b/foo.json', //dummy
   fileMatch: ['a://b/foo.json'], //dummy
   schema: {
-    $schema: 'https://json-schema.org/draft/2020-12/schema',
-    title: 'Product Config',
     type: 'object',
     oneOf: [
-      { $ref: '#/$defs/membershipConfig' },
-      { $ref: '#/$defs/eventConfig' },
-      { $ref: '#/$defs/packageConfig' },
-    ],
-    $defs: {
-      membershipConfig: {
-        type: 'object',
-        required: ['duration_days', 'recurring'],
+      {
+        title: 'Membership Config',
         properties: {
+          type: {
+            const: 'membership',
+          },
           duration_days: {
             type: 'integer',
             minimum: 1,
@@ -31,16 +26,16 @@ export const productConfigsJSONSchema: JSONField['jsonSchema'] = {
           grace_period_days: {
             type: 'integer',
             minimum: 0,
-            default: 0,
           },
         },
-        additionalProperties: false,
+        required: ['type', 'duration_days'],
       },
-
-      eventConfig: {
-        type: 'object',
-        required: ['event_start', 'event_end', 'venue', 'seat_required'],
+      {
+        title: 'Event Config',
         properties: {
+          type: {
+            const: 'event',
+          },
           event_start: {
             type: 'string',
             format: 'date-time',
@@ -51,20 +46,24 @@ export const productConfigsJSONSchema: JSONField['jsonSchema'] = {
           },
           venue: {
             type: 'string',
-            minLength: 1,
           },
-          seat_required: {
+          max_capacity: {
+            type: 'integer',
+            minimum: 1,
+          },
+          allow_multiple_entry: {
             type: 'boolean',
           },
         },
-        additionalProperties: false,
+        required: ['type', 'event_start', 'event_end'],
       },
-
-      packageConfig: {
-        type: 'object',
-        required: ['visit_limit', 'expiry_days'],
+      {
+        title: 'Package Config',
         properties: {
-          visit_limit: {
+          type: {
+            const: 'package',
+          },
+          visit_quota: {
             type: 'integer',
             minimum: 1,
           },
@@ -73,8 +72,8 @@ export const productConfigsJSONSchema: JSONField['jsonSchema'] = {
             minimum: 1,
           },
         },
-        additionalProperties: false,
+        required: ['type', 'visit_quota'],
       },
-    },
+    ],
   },
 }

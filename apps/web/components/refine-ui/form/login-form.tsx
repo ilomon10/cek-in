@@ -27,7 +27,6 @@ export function LoginForm({
   const [rememberMe, _setRememberMe] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { open } = useNotification();
   const searchparams = useSearchParams();
   const redirectTo = searchparams.get("to") || "/dashboard";
 
@@ -35,26 +34,13 @@ export function LoginForm({
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    login(
-      {
-        provider: "local",
-        email,
-        password,
-        rememberMe,
-        redirectTo,
-      },
-      {
-        onSuccess: (data) => {
-          if (data.success) {
-            // console.log("success", data);
-            // open?.({
-            //   type: "success",
-            //   message: "Success",
-            // });
-          }
-        },
-      }
-    );
+    login({
+      provider: "local",
+      email,
+      password,
+      rememberMe,
+      redirectTo,
+    });
   };
 
   const handleSignInWithGoogle = () => {

@@ -90,6 +90,9 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {
+    tenants: {
+      members: 'tenant-users';
+    };
     users: {
       tenantUsers: 'tenant-users';
     };
@@ -225,7 +228,6 @@ export interface Tenant {
   status?: ('active' | 'suspended' | 'trial') | null;
   plan?: (number | null) | Plan;
   logoAsset?: (number | null) | Media;
-  subscription_plan?: string | null;
   meta?:
     | {
         [k: string]: unknown;
@@ -237,6 +239,12 @@ export interface Tenant {
     | null;
   isDeleted?: boolean | null;
   deletedAt?: string | null;
+  subscriptionPlan?: string | null;
+  members?: {
+    docs?: (number | TenantUser)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -307,15 +315,6 @@ export interface User {
     | null;
   isDeleted?: boolean | null;
   deletedAt?: string | null;
-  tenantUser?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
   tenantUsers?: {
     docs?: (number | TenantUser)[];
     hasNextPage?: boolean;
@@ -354,6 +353,7 @@ export interface TenantUser {
   user?: (number | null) | User;
   name?: string | null;
   email?: string | null;
+  tenantName?: string | null;
   avatarAsset?: (number | null) | Media;
   role: 'owner' | 'admin' | 'staff' | 'cashier';
   meta?:
@@ -421,17 +421,7 @@ export interface Product {
   price?: string | null;
   currency?: string | null;
   isActive?: boolean | null;
-  config?: {
-    duration_days?: number | null;
-    visit_limit?: number | null;
-    recurring?: boolean | null;
-    grace_period_days?: number | null;
-    event_start?: string | null;
-    event_end?: string | null;
-    venue?: string | null;
-    seat_required?: boolean | null;
-    expiry_days?: number | null;
-  };
+  config?: MembershipConfig | EventConfig | PackageConfig;
   thumbnailAsset?: (number | null) | Media;
   meta?:
     | {
@@ -444,6 +434,29 @@ export interface Product {
     | null;
   updatedAt: string;
   createdAt: string;
+}
+export interface MembershipConfig {
+  type: 'membership';
+  duration_days: number;
+  visit_limit?: number | null;
+  recurring?: boolean;
+  grace_period_days?: number;
+  [k: string]: unknown;
+}
+export interface EventConfig {
+  type: 'event';
+  event_start: string;
+  event_end: string;
+  venue?: string;
+  max_capacity?: number;
+  allow_multiple_entry?: boolean;
+  [k: string]: unknown;
+}
+export interface PackageConfig {
+  type: 'package';
+  visit_quota: number;
+  expiry_days?: number;
+  [k: string]: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -816,10 +829,11 @@ export interface TenantsSelect<T extends boolean = true> {
   status?: T;
   plan?: T;
   logoAsset?: T;
-  subscription_plan?: T;
   meta?: T;
   isDeleted?: T;
   deletedAt?: T;
+  subscriptionPlan?: T;
+  members?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -832,6 +846,7 @@ export interface TenantUsersSelect<T extends boolean = true> {
   user?: T;
   name?: T;
   email?: T;
+  tenantName?: T;
   avatarAsset?: T;
   role?: T;
   meta?: T;
@@ -850,7 +865,6 @@ export interface UsersSelect<T extends boolean = true> {
   meta?: T;
   isDeleted?: T;
   deletedAt?: T;
-  tenantUser?: T;
   tenantUsers?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -968,19 +982,7 @@ export interface ProductsSelect<T extends boolean = true> {
   price?: T;
   currency?: T;
   isActive?: T;
-  config?:
-    | T
-    | {
-        duration_days?: T;
-        visit_limit?: T;
-        recurring?: T;
-        grace_period_days?: T;
-        event_start?: T;
-        event_end?: T;
-        venue?: T;
-        seat_required?: T;
-        expiry_days?: T;
-      };
+  config?: T;
   thumbnailAsset?: T;
   meta?: T;
   updatedAt?: T;

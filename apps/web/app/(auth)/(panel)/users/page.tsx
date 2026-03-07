@@ -118,19 +118,12 @@ export default function UserList() {
         },
       },
       {
-        // Column for status field
         id: "name",
-        accessorKey: "name", // Maps to the 'status' field in your data
+        accessorKey: "name",
         header: "Name",
       },
-      {
-        // Column for status field
-        id: "roles",
-        accessorKey: "roles", // Maps to the 'status' field in your data
-        header: "Roles",
-      },
     ],
-    []
+    [],
   );
 
   const table = useTable<User>({

@@ -5,6 +5,7 @@ export const TenantUsers: CollectionConfig = {
   admin: {
     group: 'Platform',
     useAsTitle: 'email',
+    defaultColumns: ['email', 'tenant'],
   },
   fields: [
     // Email added by default
@@ -34,6 +35,15 @@ export const TenantUsers: CollectionConfig = {
       name: 'email',
       type: 'text',
       virtual: 'user.email',
+      admin: {
+        readOnly: true,
+      },
+    },
+
+    {
+      name: 'tenantName',
+      type: 'text',
+      virtual: 'tenant.name',
       admin: {
         readOnly: true,
       },

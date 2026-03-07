@@ -3,7 +3,7 @@
 import { LoadingOverlay } from "@/components/refine-ui/layout/loading-overlay";
 import { useApiUrl, useForm as useFormDispatch } from "@refinedev/core";
 import { useForm } from "react-hook-form";
-import { User } from "@/components/providers/payload-types";
+import { TenantUser, User } from "@/components/providers/payload-types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@repo/ui/components/ui/form";
 import * as z from "zod";
@@ -46,7 +46,6 @@ type PasswordFormData = z.infer<typeof passwordSchema>;
 export default function AccountPage() {
   const router = useRouter();
   const { user: userCtx } = useUser();
-  const apiUrl = useApiUrl();
 
   const {
     onFinish,
@@ -79,7 +78,6 @@ export default function AccountPage() {
       email: values.email,
       username: values.username,
       name: values.name,
-      roles: values.roles,
     });
   };
 
@@ -98,7 +96,6 @@ export default function AccountPage() {
       email: defaultValues.email || "",
       name: defaultValues.name || "",
       username: defaultValues.username || "",
-      roles: (defaultValues.roles || []) as any[],
     });
   }, [defaultValues]);
 

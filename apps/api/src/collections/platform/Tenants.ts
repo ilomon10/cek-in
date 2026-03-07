@@ -1,4 +1,8 @@
+import { TenantCreateHandler } from '@/endpoints/tenant-create'
+import { generateId } from '@/utils/generate-id'
+import { generateSimpleHash } from '@/utils/generate-simple-hash'
 import type { CollectionConfig } from 'payload'
+import { slugify } from 'payload/shared'
 
 export const Tenants: CollectionConfig = {
   slug: 'tenants',
@@ -15,6 +19,19 @@ export const Tenants: CollectionConfig = {
       name: 'slug',
       type: 'text',
       unique: true,
+      hooks: {
+        beforeChange: [
+          async ({ siblingData, value }) => {
+            let slug: string = value as string
+            const rawId = siblingData.id || generateId()
+            if (!value) {
+              const id = generateSimpleHash(`${rawId}`, true)
+              slug = slugify(`${siblingData.name} ${id}`) as string
+            }
+            return slug
+          },
+        ],
+      },
     },
     {
       name: 'status',
@@ -38,11 +55,6 @@ export const Tenants: CollectionConfig = {
     },
 
     {
-      name: 'subscription_plan',
-      type: 'text',
-    },
-
-    {
       name: 'meta',
       type: 'json',
     },
@@ -53,6 +65,32 @@ export const Tenants: CollectionConfig = {
     {
       name: 'deletedAt',
       type: 'date',
+    },
+
+    {
+      name: 'subscriptionPlan',
+      type: 'text',
+      virtual: 'plan.name',
+      admin: {
+        readOnly: true,
+      },
+    },
+
+    {
+      name: 'members',
+      type: 'join',
+      collection: 'tenant-users',
+      on: 'tenant',
+      admin: {
+        defaultColumns: ['email', 'role'],
+      },
+    },
+  ],
+  endpoints: [
+    {
+      path: '/create',
+      method: 'post',
+      handler: TenantCreateHandler,
     },
   ],
 }

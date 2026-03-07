@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { productConfigsJSONSchema } from './ProductConfigs.schema'
 
 export const Products: CollectionConfig = {
   slug: 'products',
@@ -42,91 +43,8 @@ export const Products: CollectionConfig = {
 
     {
       name: 'config',
-      type: 'group',
-      label: 'Product Configuration',
-      fields: [
-        /*
-        ======================
-        MEMBERSHIP CONFIG
-        ======================
-        */
-        {
-          name: 'duration_days',
-          type: 'number',
-          admin: {
-            condition: (_, siblingData) => siblingData?.type === 'membership',
-          },
-        },
-        {
-          name: 'visit_limit',
-          type: 'number',
-          admin: {
-            condition: (_, siblingData) =>
-              siblingData?.type === 'membership' || siblingData?.type === 'package',
-          },
-        },
-        {
-          name: 'recurring',
-          type: 'checkbox',
-          admin: {
-            condition: (_, siblingData) => siblingData?.type === 'membership',
-          },
-        },
-        {
-          name: 'grace_period_days',
-          type: 'number',
-          admin: {
-            condition: (_, siblingData) => siblingData?.type === 'membership',
-          },
-        },
-
-        /*
-        ======================
-        EVENT CONFIG
-        ======================
-        */
-        {
-          name: 'event_start',
-          type: 'date',
-          admin: {
-            condition: (_, siblingData) => siblingData?.type === 'event',
-          },
-        },
-        {
-          name: 'event_end',
-          type: 'date',
-          admin: {
-            condition: (_, siblingData) => siblingData?.type === 'event',
-          },
-        },
-        {
-          name: 'venue',
-          type: 'text',
-          admin: {
-            condition: (_, siblingData) => siblingData?.type === 'event',
-          },
-        },
-        {
-          name: 'seat_required',
-          type: 'checkbox',
-          admin: {
-            condition: (_, siblingData) => siblingData?.type === 'event',
-          },
-        },
-
-        /*
-        ======================
-        PACKAGE CONFIG
-        ======================
-        */
-        {
-          name: 'expiry_days',
-          type: 'number',
-          admin: {
-            condition: (_, siblingData) => siblingData?.type === 'package',
-          },
-        },
-      ],
+      type: 'json',
+      jsonSchema: productConfigsJSONSchema,
     },
 
     {

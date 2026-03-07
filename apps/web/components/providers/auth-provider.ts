@@ -73,11 +73,19 @@ export const authProvider = (): AuthProvider => {
             result.success = false;
             result.error = new Error(res.errors[0]?.message);
           } else {
+            if (
+              !res.user.tenantUsers ||
+              res.user.tenantUsers?.docs?.length === 0
+            ) {
+              result.redirectTo = "onboarding";
+            }
+            console.log(res.user.tenantUsers);
             result.success = true;
             result.successNotification = {
               message: "Login Successful",
               description: "You have successfully logged in.",
             };
+            console.log(result);
             if (res.token) {
               setTokenExpireDate(res.exp);
               setToken(res.token);

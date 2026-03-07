@@ -28,7 +28,9 @@ export const dataProvider = (): DataProvider => {
         },
         config,
       );
-      return res;
+      return {
+        data: res,
+      };
     },
     update: async (props) => {
       const resource = props.resource as any;
@@ -44,7 +46,9 @@ export const dataProvider = (): DataProvider => {
         },
         config,
       );
-      return res;
+      return {
+        data: res,
+      };
     },
     deleteOne: async (props) => {
       const resource = props.resource as any;
@@ -114,5 +118,29 @@ export const dataProvider = (): DataProvider => {
       };
     },
     getApiUrl: () => client.baseURL,
+    custom: async (params) => {
+      const METHOD_MAP = {
+        get: "GET",
+        delete: "DELETE",
+        head: "HEAD",
+        options: "OPTIONS",
+        post: "POST",
+        put: "PUT",
+        patch: "PATCH",
+      };
+      const req = await client.request({
+        method: METHOD_MAP[params.method] as
+          | "GET"
+          | "DELETE"
+          | "POST"
+          | "PUT"
+          | "PATCH",
+        path: params.url,
+        json: params.payload,
+      });
+      return {
+        data: await req.json(),
+      };
+    },
   };
 };

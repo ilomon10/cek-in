@@ -1,5 +1,6 @@
 import { User } from '@/payload-types'
 import type { CollectionConfig } from 'payload'
+import { userAccessCreate } from './Users.access'
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -14,6 +15,9 @@ export const Users: CollectionConfig = {
       allowEmailLogin: true,
       requireEmail: true,
     },
+  },
+  access: {
+    create: userAccessCreate,
   },
   fields: [
     // Email added by default
@@ -41,6 +45,14 @@ export const Users: CollectionConfig = {
       name: 'isPlatformAdmin',
       type: 'checkbox',
       defaultValue: false,
+      hooks: {
+        beforeChange: [
+          ({ value, req }) => {
+            if (!req.user?.isPlatformAdmin) return false
+            return value
+          },
+        ],
+      },
     },
     {
       name: 'status',
@@ -66,37 +78,13 @@ export const Users: CollectionConfig = {
     },
 
     {
-      name: 'tenantUser',
-      type: 'json',
-      virtual: true,
-      hooks: {
-        afterRead: [
-          async ({ siblingData, req }) => {
-            if (!siblingData?.tenantUsers?.docs) return null
-            if (!siblingData?.tenantUsers?.docs?.[0]) return null
-            const res = await req.payload.find({
-              collection: 'tenant-users',
-              where: {
-                id: {
-                  equals: siblingData.tenantUsers.docs?.[0].id,
-                },
-              },
-              depth: 0,
-            })
-            if (res && !res.docs?.[0]) return null
-            console.log('GET', res.docs[0])
-            return res.docs
-          },
-        ],
-      },
-    },
-
-    {
       name: 'tenantUsers',
       type: 'join',
       collection: 'tenant-users',
       on: 'user',
-      hidden: true as any,
+      admin: {
+        defaultColumns: ['tenant', 'email'],
+      },
     },
   ],
 }

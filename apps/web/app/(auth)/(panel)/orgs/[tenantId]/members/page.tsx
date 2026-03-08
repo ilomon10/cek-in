@@ -1,6 +1,6 @@
 "use client";
 
-import { Template, User } from "@/components/providers/payload-types";
+import { TenantUser, User } from "@/components/providers/payload-types";
 import { DataTable } from "@/components/refine-ui/data-table/data-table";
 import { DataTableFilterDropdownText } from "@/components/refine-ui/data-table/data-table-filter";
 import { DataTableSorter } from "@/components/refine-ui/data-table/data-table-sorter";
@@ -14,9 +14,11 @@ import Link from "next/link";
 import { useMemo } from "react";
 import dayjs from "dayjs";
 import { EditIcon } from "lucide-react";
+import { useWithTenant } from "@/components/hooks/use-tenant";
 
-export default function TemplateList() {
-  const columns = useMemo<ColumnDef<Template>[]>(
+export default function MemberList() {
+  const tenant = useWithTenant();
+  const columns = useMemo<ColumnDef<TenantUser>[]>(
     () => [
       {
         // Column for ID field
@@ -31,18 +33,17 @@ export default function TemplateList() {
         maxSize: 24,
       },
       {
-        // Column for title field
-        id: "title",
-        accessorKey: "title", // Maps to the 'title' field in your data
+        id: "name",
+        accessorKey: "name",
         header: ({ column, table }) => (
           <div className="flex items-center gap-1">
-            <span>Title</span>
+            <span>Name</span>
             <div>
               <DataTableFilterDropdownText
                 defaultOperator="contains"
                 column={column}
                 table={table}
-                placeholder="Filter by title"
+                placeholder="Filter by name"
               />
             </div>
           </div>
@@ -50,7 +51,7 @@ export default function TemplateList() {
         cell(props) {
           return (
             <Link
-              href={`/templates/edit/${props.row.original.id}`}
+              href={`/members/edit/${props.row.original.id}`}
               className="hover:underline"
             >
               {props.renderValue() as string}
@@ -59,49 +60,38 @@ export default function TemplateList() {
         },
       },
       {
-        id: "slug",
-        accessorKey: "slug",
+        id: "email",
+        accessorKey: "email",
         header: ({ column, table }) => (
           <div className="flex items-center gap-1">
-            <span>Slug</span>
+            <span>Email</span>
             <div>
               <DataTableFilterDropdownText
                 defaultOperator="contains"
                 column={column}
                 table={table}
-                placeholder="Filter by slug"
+                placeholder="Filter by email"
               />
             </div>
           </div>
         ),
-        cell(props) {
-          const slug = props.renderValue() as string;
-          return (
-            <Link
-              href={`/templates/editor/${slug}`}
-              className="hover:underline flex items-center"
-            >
-              {slug}
-              <span className="ml-1">
-                <EditIcon className="size-3" />
-              </span>
-            </Link>
-          );
-        },
       },
       {
-        // Column for status field
-        id: "owner",
-        accessorKey: "owner", // Maps to the 'status' field in your data
-        header: "Owner",
-        cell(props) {
-          const user = props.row.original.owner as User;
-          return (
-            <Link href={`/users/show/${user.id}`} className="hover:underline">
-              {user.email}
-            </Link>
-          );
-        },
+        id: "role",
+        accessorKey: "role",
+        header: ({ column, table }) => (
+          <div className="flex items-center gap-1">
+            <span>Role</span>
+            <div>
+              <DataTableFilterDropdownText
+                defaultOperator="contains"
+                column={column}
+                table={table}
+                placeholder="Filter by email"
+              />
+            </div>
+          </div>
+        ),
       },
       {
         // Column for status field
@@ -114,11 +104,22 @@ export default function TemplateList() {
         },
       },
     ],
-    []
+    [],
   );
 
-  const table = useTable<Template>({
+  const table = useTable<TenantUser>({
     columns,
+    refineCoreProps: {
+      filters: {
+        initial: [
+          {
+            field: "tenant",
+            operator: "eq",
+            value: tenant.id,
+          },
+        ],
+      },
+    },
   });
 
   return (

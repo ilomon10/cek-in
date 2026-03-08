@@ -1,5 +1,5 @@
 import { TenantCreateHandler } from '@/endpoints/tenant-create'
-import { TenantUser } from '@/payload-types'
+import { Product, TenantUser } from '@/payload-types'
 import { generateId } from '@/utils/generate-id'
 import { generateSimpleHash } from '@/utils/generate-simple-hash'
 import type { CollectionConfig } from 'payload'
@@ -15,6 +15,7 @@ export const Tenants: CollectionConfig = {
     {
       name: 'name',
       type: 'text',
+      required: true,
     },
     {
       name: 'slug',
@@ -42,6 +43,8 @@ export const Tenants: CollectionConfig = {
         { label: 'Suspended', value: 'suspended' },
         { label: 'Trial', value: 'trial' },
       ],
+      required: true,
+      defaultValue: 'active',
     },
     {
       name: 'plan',
@@ -108,6 +111,26 @@ export const Tenants: CollectionConfig = {
         defaultColumns: ['email', 'role'],
       },
     },
+
+    {
+      name: 'products',
+      type: 'join',
+      collection: 'products',
+      on: 'tenant',
+      admin: {
+        defaultColumns: ['name', 'price', 'productType'],
+      },
+    },
+
+    {
+      name: 'customers',
+      type: 'join',
+      collection: 'customers',
+      on: 'tenant',
+      admin: {
+        defaultColumns: ['name', 'email', 'phone', 'gender'],
+      },
+    },
   ],
   hooks: {
     beforeDelete: [
@@ -115,13 +138,22 @@ export const Tenants: CollectionConfig = {
         const res = await req.payload.findByID({
           collection: 'tenants',
           id: id,
+          depth: 0,
         })
 
         // Remove Tenant Users before delete Tenant
-        for (const member of res.members?.docs as TenantUser[]) {
+        for (const member of res.members?.docs as number[]) {
           await req.payload.delete({
             collection: 'tenant-users',
-            id: member.id,
+            id: member,
+          })
+        }
+
+        // Remove Tenant Products before delete Tenant
+        for (const product of res.products?.docs as number[]) {
+          await req.payload.delete({
+            collection: 'products',
+            id: product,
           })
         }
       },

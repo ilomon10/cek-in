@@ -41,21 +41,24 @@ export default function RootLayout({
             resources={[
               {
                 name: "users",
-                list: "/users",
-                edit: "/users/edit/:id",
-                create: "/users/create",
+                list: "/orgs/:tenantId/users",
+                edit: "/orgs/:tenantId/users/edit/:id",
+                create: "/orgs/:tenantId/users/create",
               },
               {
-                name: "templates",
-                list: "/templates",
-                edit: "/templates/edit/:id",
-                create: "/templates/create",
+                name: "tenant-users",
+                list: "/orgs/:tenantId/members",
+                edit: "/orgs/:tenantId/members/edit/:id",
+                create: "/orgs/:tenantId/members/create",
+                meta: {
+                  label: "Members",
+                },
               },
               {
-                name: "invitations",
-                list: "/invitations",
-                edit: "/invitations/edit/:id",
-                create: "/invitations/create",
+                name: "products",
+                list: "/orgs/:tenantId/products",
+                edit: "/orgs/:tenantId/products/edit/:id",
+                create: "/orgs/:tenantId/products/create",
               },
               {
                 name: "media",

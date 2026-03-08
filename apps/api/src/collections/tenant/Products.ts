@@ -8,6 +8,7 @@ export const Products: CollectionConfig = {
       name: 'tenant',
       type: 'relationship',
       relationTo: 'tenants',
+      required: true,
     },
     {
       name: 'name',
@@ -27,14 +28,20 @@ export const Products: CollectionConfig = {
         { label: 'Event', value: 'event' },
         { label: 'Package', value: 'package' },
       ],
+      defaultValue: 'membership',
+      required: true,
     },
     {
       name: 'price',
       type: 'text',
+      required: true,
+      defaultValue: 0,
     },
     {
       name: 'currency',
       type: 'text',
+      required: true,
+      defaultValue: 'IDR',
     },
     {
       name: 'isActive',

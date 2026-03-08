@@ -39,17 +39,17 @@ const navMain: Item[] = [
     can: () => true,
   },
   {
-    title: "Invitations",
-    url: "invitations",
+    title: "Products",
+    url: "products",
     icon: SquareTerminalIcon,
-    can: (role: string) => !checkRBAC([role], ["system-admin"]),
+    can: (role: string) => checkRBAC([role], ["owner", "staff"]),
   },
   {
-    title: "Templates",
-    url: "templates",
+    title: "Members",
+    url: "members",
     icon: BotIcon,
     can: (role: string) => {
-      return checkRBAC([role], ["admin", "designer"]);
+      return checkRBAC([role], ["owner", "staff"]);
     },
   },
 ];

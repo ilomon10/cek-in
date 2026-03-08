@@ -4,6 +4,7 @@ import { useList, useOne } from "@refinedev/core";
 import { useParams } from "next/navigation";
 import { Tenant, TenantUser } from "../providers/payload-types";
 import { useUser } from "../pages/panel/auth-route";
+import { createContext, FC, PropsWithChildren, useContext } from "react";
 
 function isEmptyOrNull(value: any) {
   return (
@@ -53,4 +54,22 @@ export const useTenants = () => {
   });
 
   return data?.data || [];
+};
+
+const TenantContext = createContext<Tenant | null>(null);
+
+export const TenantContextProvider: FC<
+  PropsWithChildren<{ tenant: Tenant }>
+> = ({ tenant, children }) => {
+  return (
+    <TenantContext.Provider value={tenant}>{children}</TenantContext.Provider>
+  );
+};
+
+export const useWithTenant = () => {
+  const context = useContext(TenantContext);
+  if (!context) {
+    throw new Error("`useWithTenant()` must be in <TenantContext.Provider/>");
+  }
+  return context;
 };

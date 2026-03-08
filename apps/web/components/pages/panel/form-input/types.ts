@@ -55,6 +55,13 @@ export type RadioFormInput<
   type: "radio";
   options: Option[];
 };
+export type CheckboxFormInput<
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+  TTransformedValues = TFieldValues,
+> = GeneralFormInput<TFieldValues, TName, TTransformedValues> & {
+  type: "checkbox";
+};
 export type FileFormInput<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,

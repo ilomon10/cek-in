@@ -7,6 +7,7 @@ export const Customers: CollectionConfig = {
       name: 'tenant',
       type: 'relationship',
       relationTo: 'tenants',
+      required: true,
     },
     {
       name: 'name',
@@ -27,7 +28,7 @@ export const Customers: CollectionConfig = {
       type: 'text',
     },
     {
-      name: 'birth_date',
+      name: 'birthDate',
       type: 'text',
     },
 

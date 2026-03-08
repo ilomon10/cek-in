@@ -1,11 +1,14 @@
 "use client";
 
 import { useParsed } from "@refinedev/core";
-import { useParams } from "next/navigation";
-import { Redirect, useUser } from "./auth-route";
-import { useTenant } from "@/components/hooks/use-tenant";
+import { Redirect } from "./auth-route";
+import {
+  TenantContextProvider,
+  useTenant,
+} from "@/components/hooks/use-tenant";
 import { isEmpty } from "lodash";
 import { LoadingPage } from "../loading-page";
+import { Tenant } from "@/components/providers/payload-types";
 
 export default function AuthOrgsRouteLayout({
   children,
@@ -33,5 +36,9 @@ export default function AuthOrgsRouteLayout({
     }
   }
 
-  return children;
+  return (
+    <TenantContextProvider tenant={tenant as Tenant}>
+      {children}
+    </TenantContextProvider>
+  );
 }

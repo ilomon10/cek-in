@@ -38,11 +38,11 @@ export const productConfigsJSONSchema: JSONField['jsonSchema'] = {
           },
           event_start: {
             type: 'string',
-            format: 'date-time',
+            // format: 'date-time',
           },
           event_end: {
             type: 'string',
-            format: 'date-time',
+            // format: 'date-time',
           },
           venue: {
             type: 'string',

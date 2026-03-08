@@ -43,7 +43,6 @@ type User = {
 
 // This is sample data.
 const menu = ({
-  user,
   tenants,
 }: {
   user: User;
@@ -56,26 +55,8 @@ const menu = ({
     plan: subscriptionPlan,
   }));
 
-  const projects = [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
-  ];
   return {
     teams: navTeams,
-    projects,
   };
 };
 

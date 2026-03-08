@@ -92,6 +92,8 @@ export interface Config {
   collectionsJoins: {
     tenants: {
       members: 'tenant-users';
+      products: 'products';
+      customers: 'customers';
     };
     users: {
       tenantUsers: 'tenant-users';
@@ -223,9 +225,9 @@ export interface TentantSubscription {
  */
 export interface Tenant {
   id: number;
-  name?: string | null;
+  name: string;
   slug?: string | null;
-  status?: ('active' | 'suspended' | 'trial') | null;
+  status: 'active' | 'suspended' | 'trial';
   plan?: (number | null) | Plan;
   logoUrl?: string | null;
   logoAsset?: (number | null) | Media;
@@ -243,6 +245,16 @@ export interface Tenant {
   subscriptionPlan?: string | null;
   members?: {
     docs?: (number | TenantUser)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  products?: {
+    docs?: (number | Product)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  customers?: {
+    docs?: (number | Customer)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -371,56 +383,16 @@ export interface TenantUser {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "customers".
- */
-export interface Customer {
-  id: number;
-  tenant?: (number | null) | Tenant;
-  name: string;
-  email?: string | null;
-  phone?: string | null;
-  gender?: string | null;
-  birth_date?: string | null;
-  avatarAsset?: (number | null) | Media;
-  meta?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "devices".
- */
-export interface Device {
-  id: number;
-  name: string;
-  deviceType: 'qr_scanner' | 'gate' | 'tablet';
-  apiKey: string;
-  lastSeen?: string | null;
-  status?: string | null;
-  user?: (number | null) | User;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "products".
  */
 export interface Product {
   id: number;
-  tenant?: (number | null) | Tenant;
+  tenant: number | Tenant;
   name: string;
   descriptions?: string | null;
-  productType?: ('membership' | 'event' | 'package') | null;
-  price?: string | null;
-  currency?: string | null;
+  productType: 'membership' | 'event' | 'package';
+  price: string;
+  currency: string;
   isActive?: boolean | null;
   config?: MembershipConfig | EventConfig | PackageConfig;
   thumbnailAsset?: (number | null) | Media;
@@ -458,6 +430,46 @@ export interface PackageConfig {
   visit_quota: number;
   expiry_days?: number;
   [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customers".
+ */
+export interface Customer {
+  id: number;
+  tenant: number | Tenant;
+  name: string;
+  email?: string | null;
+  phone?: string | null;
+  gender?: string | null;
+  birthDate?: string | null;
+  avatarAsset?: (number | null) | Media;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "devices".
+ */
+export interface Device {
+  id: number;
+  name: string;
+  deviceType: 'qr_scanner' | 'gate' | 'tablet';
+  apiKey: string;
+  lastSeen?: string | null;
+  status?: string | null;
+  user?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -836,6 +848,8 @@ export interface TenantsSelect<T extends boolean = true> {
   deletedAt?: T;
   subscriptionPlan?: T;
   members?: T;
+  products?: T;
+  customers?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -899,7 +913,7 @@ export interface CustomersSelect<T extends boolean = true> {
   email?: T;
   phone?: T;
   gender?: T;
-  birth_date?: T;
+  birthDate?: T;
   avatarAsset?: T;
   meta?: T;
   updatedAt?: T;

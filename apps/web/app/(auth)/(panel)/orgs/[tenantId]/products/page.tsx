@@ -1,6 +1,7 @@
 "use client";
 
-import { Invitation, User } from "@/components/providers/payload-types";
+import { useTenant, useWithTenant } from "@/components/hooks/use-tenant";
+import { Product, User } from "@/components/providers/payload-types";
 import { DataTable } from "@/components/refine-ui/data-table/data-table";
 import { DataTableFilterDropdownText } from "@/components/refine-ui/data-table/data-table-filter";
 import { DataTableSorter } from "@/components/refine-ui/data-table/data-table-sorter";
@@ -14,8 +15,9 @@ import dayjs from "dayjs";
 import Link from "next/link";
 import { useMemo } from "react";
 
-export default function InvitationList() {
-  const columns = useMemo<ColumnDef<Invitation>[]>(
+export default function ProductsList() {
+  const tenant = useWithTenant();
+  const columns = useMemo<ColumnDef<Product>[]>(
     () => [
       {
         // Column for ID field
@@ -30,18 +32,17 @@ export default function InvitationList() {
         maxSize: 24,
       },
       {
-        // Column for title field
-        id: "title",
-        accessorKey: "title", // Maps to the 'title' field in your data
+        id: "name",
+        accessorKey: "name",
         header: ({ column, table }) => (
           <div className="flex items-center gap-1">
-            <span>Title</span>
+            <span>Name</span>
             <div>
               <DataTableFilterDropdownText
                 defaultOperator="contains"
                 column={column}
                 table={table}
-                placeholder="Filter by title"
+                placeholder="Filter by Name"
               />
             </div>
           </div>
@@ -58,45 +59,11 @@ export default function InvitationList() {
         },
       },
       {
-        id: "slug",
-        accessorKey: "slug",
-        header: ({ column, table }) => (
-          <div className="flex items-center gap-1">
-            <span>Slug</span>
-            <div>
-              <DataTableFilterDropdownText
-                defaultOperator="contains"
-                column={column}
-                table={table}
-                placeholder="Filter by slug"
-              />
-            </div>
-          </div>
-        ),
+        id: "price",
+        accessorKey: "price",
+        header: "Price",
         cell(props) {
-          const slug = props.renderValue() as string;
-          return (
-            <Link
-              href={`/invitations/editor/${slug}`}
-              className="hover:underline"
-            >
-              {slug}
-            </Link>
-          );
-        },
-      },
-      {
-        // Column for status field
-        id: "owner",
-        accessorKey: "owner", // Maps to the 'status' field in your data
-        header: "Owner",
-        cell(props) {
-          const user = props.row.original.owner as User;
-          return (
-            <Link href={`/users/show/${user.id}`} className="hover:underline">
-              {user.email}
-            </Link>
-          );
+          return props.getValue();
         },
       },
       {
@@ -110,11 +77,22 @@ export default function InvitationList() {
         },
       },
     ],
-    []
+    [],
   );
 
-  const table = useTable<Invitation>({
+  const table = useTable<Product>({
     columns,
+    refineCoreProps: {
+      filters: {
+        initial: [
+          {
+            field: "tenant",
+            operator: "eq",
+            value: tenant.id,
+          },
+        ],
+      },
+    },
   });
 
   return (

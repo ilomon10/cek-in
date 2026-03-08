@@ -34,12 +34,14 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@repo/ui/components/ui/empty";
+import { Checkbox } from "@repo/ui/components/ui/checkbox";
+import { Label } from "@repo/ui/components/ui/label";
 
 export const FormInput = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >(
-  props: FormInputProps<TFieldValues, TName, TFieldValues>
+  props: FormInputProps<TFieldValues, TName, TFieldValues>,
 ) => {
   const {
     control,
@@ -111,6 +113,15 @@ export const FormInput = <
             <RadioGroupItem value={value as string}>{label}</RadioGroupItem>
           ))}
         </RadioGroup>
+      );
+      break;
+    }
+    case "checkbox": {
+      renderInput = ({ field }) => (
+        <Label>
+          <Checkbox value={field.value} onCheckedChange={field.onChange} />
+          {label}
+        </Label>
       );
       break;
     }

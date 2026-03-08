@@ -19,6 +19,7 @@ import Link from "next/link";
 import { APP_NAME } from "@/components/constants";
 import Image from "next/image";
 import logo from "@/public/logo.svg";
+import { Spinner } from "@repo/ui/components/ui/spinner";
 
 export function LoginForm({
   className,
@@ -28,7 +29,7 @@ export function LoginForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const searchparams = useSearchParams();
-  const redirectTo = searchparams.get("to") || "/dashboard";
+  const redirectTo = searchparams.get("to") || "/orgs/0/dashboard";
 
   const { mutate: login, isPending } = useLogin();
 
@@ -95,7 +96,15 @@ export function LoginForm({
             />
           </Field>
           <Field>
-            <Button type="submit">Login</Button>
+            <Button type="submit" disabled={isPending}>
+              {isPending ? (
+                <>
+                  <Spinner /> <span>Loading</span>
+                </>
+              ) : (
+                "Login"
+              )}
+            </Button>
           </Field>
           <FieldSeparator>Or</FieldSeparator>
           <Field className="grid gap-4 sm:grid-cols-2">

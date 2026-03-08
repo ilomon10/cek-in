@@ -10,8 +10,9 @@ import {
 } from "@repo/ui/components/ui/item";
 import { Spinner } from "@repo/ui/components/ui/spinner";
 import { dataProvider } from "@/components/providers/data-provider";
-import { Tenant } from "@/components/providers/payload-types";
+import { Tenant, TenantUser, User } from "@/components/providers/payload-types";
 import { useRouter } from "next/navigation";
+import { useUser } from "../auth-route";
 
 type TenantInitializerProps = {
   className?: string;
@@ -33,6 +34,7 @@ export const TenantOnboardingStep3: FC<TenantInitializerProps> = ({
   values,
   onSubmit: onFinish,
 }) => {
+  const { user } = useUser();
   const router = useRouter();
   const [step, setStep] = useState(0);
 
@@ -81,14 +83,22 @@ export const TenantOnboardingStep3: FC<TenantInitializerProps> = ({
     {
       label: "Starting your workspace",
       fn: async (tenant: Tenant) => {
-        return tenant;
+        const res = await dataProvider().getOne({
+          resource: "users",
+          id: user?.id as number,
+        });
+        const index = (res.data.tenantUsers?.docs as TenantUser[]).findIndex(
+          ({ tenant: t }) => tenant.id === t,
+        );
+
+        return index;
       },
     },
     {
       label: "Redirecting to application",
-      fn: async () => {
+      fn: async (index: number) => {
         await new Promise((resolve) => setTimeout(resolve, 500));
-        router.replace("/dashboard");
+        router.replace(`/orgs/${index}/dashboard`);
       },
     },
   ];

@@ -10,16 +10,16 @@ export const TenantUsers: CollectionConfig = {
   fields: [
     // Email added by default
     {
-      saveToJWT: true,
       name: 'tenant',
       type: 'relationship',
       relationTo: 'tenants',
+      required: true,
     },
     {
-      saveToJWT: true,
       name: 'user',
       type: 'relationship',
       relationTo: 'users',
+      required: true,
     },
 
     {
@@ -57,7 +57,6 @@ export const TenantUsers: CollectionConfig = {
     },
 
     {
-      saveToJWT: true,
       name: 'role',
       type: 'radio',
       options: [

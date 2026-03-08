@@ -1,4 +1,5 @@
 import { TenantCreateHandler } from '@/endpoints/tenant-create'
+import { TenantUser } from '@/payload-types'
 import { generateId } from '@/utils/generate-id'
 import { generateSimpleHash } from '@/utils/generate-simple-hash'
 import type { CollectionConfig } from 'payload'
@@ -48,6 +49,28 @@ export const Tenants: CollectionConfig = {
       relationTo: 'plans',
     },
     {
+      name: 'logoUrl',
+      label: 'Logo Url',
+      type: 'text',
+      virtual: true,
+      admin: {
+        readOnly: true,
+      },
+      hooks: {
+        afterRead: [
+          async ({ siblingData, req }) => {
+            if (!siblingData.logoAsset) return undefined
+            const res = await req.payload.findByID({
+              collection: 'media',
+              id: siblingData.logoAsset,
+            })
+
+            return res.thumbnailURL
+          },
+        ],
+      },
+    },
+    {
       name: 'logoAsset',
       label: 'Logo Asset',
       type: 'upload',
@@ -86,6 +109,24 @@ export const Tenants: CollectionConfig = {
       },
     },
   ],
+  hooks: {
+    beforeDelete: [
+      async ({ id, req }) => {
+        const res = await req.payload.findByID({
+          collection: 'tenants',
+          id: id,
+        })
+
+        // Remove Tenant Users before delete Tenant
+        for (const member of res.members?.docs as TenantUser[]) {
+          await req.payload.delete({
+            collection: 'tenant-users',
+            id: member.id,
+          })
+        }
+      },
+    ],
+  },
   endpoints: [
     {
       path: '/create',

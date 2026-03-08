@@ -31,13 +31,8 @@ import {
   TenantUser,
 } from "@/components/providers/payload-types";
 import { useUser } from "./auth-route";
-import { checkRBAC } from "@/components/providers/utils/check-rbac";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@repo/ui/components/ui/avatar";
-import { cn } from "@repo/ui/lib/utils";
+import { useTenants } from "@/components/hooks/use-tenant";
+import { useParams } from "next/navigation";
 
 type User = {
   name: string;
@@ -50,42 +45,17 @@ type User = {
 const menu = ({
   user,
   tenants,
-  roles,
 }: {
   user: User;
   tenants: Tenant[];
   roles: string[];
 }) => {
-  const navTeams = [
-    {
-      name: `${user?.name} projects`,
-      logo: user.avatar,
-      plan: "Free",
-    },
-  ];
-  const navMain = [
-    {
-      title: "Invitations",
-      url: "/invitations",
-      icon: SquareTerminal,
-    },
-    {
-      title: "Templates",
-      url: "/templates",
-      icon: Bot,
-    },
-    {
-      title: "Users",
-      url: "/users",
-      icon: Users2Icon,
-      can: () => checkRBAC(roles, ["user", "designer"]),
-    },
-    {
-      title: "Settings",
-      url: "/settings",
-      icon: Settings2,
-    },
-  ];
+  const navTeams = tenants.map(({ name, logoUrl, subscriptionPlan }) => ({
+    name: name,
+    logo: logoUrl,
+    plan: subscriptionPlan,
+  }));
+
   const projects = [
     {
       name: "Design Engineering",
@@ -105,14 +75,15 @@ const menu = ({
   ];
   return {
     teams: navTeams,
-    navMain,
     projects,
   };
 };
 
 export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
-  const { user: userCtx } = useUser();
   const ApiUrl = useApiUrl();
+  const { user: userCtx } = useUser();
+  const tenants = useTenants();
+
   const user: User | null = useMemo(() => {
     if (!userCtx) return null;
     const url = new URL(ApiUrl);
@@ -120,20 +91,22 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
     return {
       name: userCtx.name || userCtx.username,
       email: userCtx.email as string,
-      role: (userCtx.tenantUser as unknown as TenantUser).role,
+      role: userCtx.tenantUser?.role || "staff",
       avatar:
         (avatarAsset && `${url.origin}${avatarAsset.thumbnailURL}`) ||
         "https://placehold.co/64x64",
     };
   }, [userCtx]);
+
   const menuItems = useMemo<any>(() => {
     if (!user) return {};
     return menu({
       user: user,
-      tenants: [],
+      tenants: tenants,
       roles: [user.role],
     });
-  }, [user]);
+  }, [user, tenants]);
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="border-b h-16 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">

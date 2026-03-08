@@ -1,6 +1,6 @@
 import { User } from '@/payload-types'
-import type { CollectionConfig } from 'payload'
-import { userAccessCreate } from './Users.access'
+import type { CollectionConfig, FieldAccess } from 'payload'
+import { adminFieldAccess, userAccessCreate, userAccessRead } from './Users.access'
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -17,7 +17,10 @@ export const Users: CollectionConfig = {
     },
   },
   access: {
-    create: userAccessCreate,
+    create: () => true,
+    read: userAccessRead,
+    delete: adminFieldAccess,
+    unlock: adminFieldAccess,
   },
   fields: [
     // Email added by default
@@ -52,6 +55,11 @@ export const Users: CollectionConfig = {
             return value
           },
         ],
+      },
+      access: {
+        create: adminFieldAccess,
+        update: adminFieldAccess,
+        read: adminFieldAccess,
       },
     },
     {

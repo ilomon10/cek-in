@@ -285,12 +285,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "subscription_plan": {
-          "name": "subscription_plan",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
         "meta": {
           "name": "meta",
           "type": "jsonb",
@@ -449,13 +443,13 @@
           "name": "tenant_id",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "user_id": {
           "name": "user_id",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "avatar_asset_id": {
           "name": "avatar_asset_id",
@@ -1618,57 +1612,9 @@
           "primaryKey": false,
           "notNull": false
         },
-        "config_duration_days": {
-          "name": "config_duration_days",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "config_visit_limit": {
-          "name": "config_visit_limit",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "config_recurring": {
-          "name": "config_recurring",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "config_grace_period_days": {
-          "name": "config_grace_period_days",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "config_event_start": {
-          "name": "config_event_start",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "config_event_end": {
-          "name": "config_event_end",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "config_venue": {
-          "name": "config_venue",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "config_seat_required": {
-          "name": "config_seat_required",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "config_expiry_days": {
-          "name": "config_expiry_days",
-          "type": "numeric",
+        "config": {
+          "name": "config",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         },
@@ -4452,6 +4398,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "dc38e4c4-70db-473e-b808-8eb7120aca38",
+  "id": "14182b00-049a-462d-a60b-bfa2019d368b",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

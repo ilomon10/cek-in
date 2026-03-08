@@ -24,6 +24,7 @@ import {
   AvatarFallback,
 } from "@repo/ui/components/ui/avatar";
 import { cn } from "@repo/ui/lib/utils";
+import { useParams, useRouter } from "next/navigation";
 
 const ImageLogo = ({ src, className }: { src: string; className: string }) => (
   <Avatar className={cn("rounded-md size-6", className)}>
@@ -41,8 +42,19 @@ export function TeamSwitcher({
     plan: string;
   }[];
 }) {
+  const router = useRouter();
   const { isMobile } = useSidebar();
-  const [activeTeam, setActiveTeam] = React.useState(teams[0]);
+  const urlParams = useParams<{ tenantId: string }>();
+  const tenantId = Number(urlParams.tenantId) || 0;
+  const activeTeam = teams[tenantId];
+
+  const handleSetActiveTeam = (index: number) => {
+    if (tenantId === index) return;
+    router.replace(`/orgs/${index}/dashboard`);
+  };
+  const handleCreateNewTeam = () => {
+    router.push(`/onboarding`);
+  };
 
   if (!activeTeam) {
     return null;
@@ -82,12 +94,12 @@ export function TeamSwitcher({
             sideOffset={4}
           >
             <DropdownMenuLabel className="text-muted-foreground text-xs">
-              Teams
+              Business
             </DropdownMenuLabel>
             {teams.map((team, index) => (
               <DropdownMenuItem
                 key={team.name}
-                onClick={() => setActiveTeam(team)}
+                onClick={() => handleSetActiveTeam(index)}
                 className="gap-2 p-2"
               >
                 <div className="flex size-6 items-center justify-center rounded-md border">
@@ -106,11 +118,16 @@ export function TeamSwitcher({
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="gap-2 p-2">
+            <DropdownMenuItem
+              className="gap-2 p-2"
+              onClick={handleCreateNewTeam}
+            >
               <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
                 <Plus className="size-4" />
               </div>
-              <div className="text-muted-foreground font-medium">Add team</div>
+              <div className="text-muted-foreground font-medium">
+                Add business
+              </div>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

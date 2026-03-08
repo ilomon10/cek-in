@@ -34,19 +34,19 @@ type Item = {
 const navMain: Item[] = [
   {
     title: "Dashboard",
-    url: "/dashboard",
+    url: "dashboard",
     icon: HomeIcon,
     can: () => true,
   },
   {
     title: "Invitations",
-    url: "/invitations",
+    url: "invitations",
     icon: SquareTerminalIcon,
     can: (role: string) => !checkRBAC([role], ["system-admin"]),
   },
   {
     title: "Templates",
-    url: "/templates",
+    url: "templates",
     icon: BotIcon,
     can: (role: string) => {
       return checkRBAC([role], ["admin", "designer"]);
@@ -57,19 +57,19 @@ const navMain: Item[] = [
 const navPlatform: Item[] = [
   {
     title: "Media",
-    url: "/media",
+    url: "media",
     icon: ImageIcon,
     can: () => true,
   },
   {
     title: "Billing",
-    url: "/billing",
+    url: "billing",
     icon: CreditCardIcon,
     can: () => true,
   },
   {
     title: "Users",
-    url: "/users",
+    url: "users",
     icon: Users2Icon,
     can: (role: string) => {
       return checkRBAC([role], ["system-admin", "admin"]);
@@ -77,7 +77,7 @@ const navPlatform: Item[] = [
   },
   {
     title: "Settings",
-    url: "/settings",
+    url: "settings",
     icon: Settings2Icon,
     can: () => true,
   },

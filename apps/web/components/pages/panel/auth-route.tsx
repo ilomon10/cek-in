@@ -1,6 +1,5 @@
 "use client";
 
-import { User } from "@/components/providers/payload-types";
 import {
   GoConfig,
   useActiveAuthProvider,
@@ -81,7 +80,7 @@ export default function AuthRouteLayout({
   return null;
 }
 
-const Redirect = ({ config }: { config: GoConfig }) => {
+export const Redirect = ({ config }: { config: GoConfig }) => {
   const go = useGo();
 
   useEffect(() => {
@@ -91,10 +90,12 @@ const Redirect = ({ config }: { config: GoConfig }) => {
   return null;
 };
 
-const UserContext = createContext<{ user: User | null } | undefined>(undefined);
+const UserContext = createContext<{ user: UserIdentity | null } | undefined>(
+  undefined,
+);
 
 const UserContextProvider: FC<PropsWithChildren> = ({ children }) => {
-  const { data: user, isLoading, refetch } = useGetIdentity<User>();
+  const { data: user, isLoading, refetch } = useGetIdentity<UserIdentity>();
 
   // Refetch user identity on mount to ensure fresh state after login
   useEffect(() => {

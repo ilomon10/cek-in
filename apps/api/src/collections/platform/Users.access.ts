@@ -1,6 +1,27 @@
 import { User } from '@/payload-types'
-import { Access, Where } from 'payload'
+import { Access, FieldAccess, Where } from 'payload'
 
 export const userAccessCreate: Access<Partial<User>> = async ({ data, req }) => {
   return true
+}
+export const userAccessRead: Access<Partial<User>> = async ({ data, req }) => {
+  const user = req.user
+
+  if (!user) {
+    return false
+  }
+
+  if (user.isPlatformAdmin) {
+    return true
+  }
+
+  return {
+    id: {
+      equals: user.id,
+    },
+  }
+}
+
+export const adminFieldAccess: FieldAccess = async ({ req }) => {
+  return !!req.user?.isPlatformAdmin
 }

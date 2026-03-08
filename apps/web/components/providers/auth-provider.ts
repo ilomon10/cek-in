@@ -6,10 +6,10 @@ import type {
   CheckResponse,
   OnErrorResponse,
 } from "@refinedev/core";
-import type { TenantUser, User } from "./payload-types";
+import type { Tenant, TenantUser, User } from "./payload-types";
 import { clientSDK } from "./client-sdk";
 import { useLocalStorage } from "../hooks/use-local-storage";
-import { SERVER_URL } from "../constants";
+import { useParams } from "next/navigation";
 
 type LoginResult = {
   exp?: number;
@@ -40,16 +40,18 @@ type RegisterParams =
   | { provider: "google"; redirectTo: string }
   | { provider: "github"; redirectTo: string };
 
-export type UserIdentity = {
-  user: User;
-  tenantUser?: TenantUser;
+export type UserIdentity = Omit<User, "tenantUser"> & {
+  tenantUser: TenantUser | null;
 };
 
 export const authProvider = (): AuthProvider => {
   const client = clientSDK();
+  const urlParams = useParams<{ tenantId?: string }>();
+  const tenantId = urlParams.tenantId ? Number(urlParams.tenantId) : null;
   const [token, setToken, removeToken] = useLocalStorage("undangon-token", "");
   const [tokenExpireDate, setTokenExpireDate, removeTokenExpireDate] =
     useLocalStorage<number | undefined>("undangon-token-expire", undefined);
+
   const result = {
     // required methods
     login: async (params: LoginParams): Promise<AuthActionResponse> => {
@@ -79,13 +81,12 @@ export const authProvider = (): AuthProvider => {
             ) {
               result.redirectTo = "onboarding";
             }
-            console.log(res.user.tenantUsers);
             result.success = true;
             result.successNotification = {
               message: "Login Successful",
               description: "You have successfully logged in.",
             };
-            console.log(result);
+
             if (res.token) {
               setTokenExpireDate(res.exp);
               setToken(res.token);
@@ -108,7 +109,6 @@ export const authProvider = (): AuthProvider => {
           result.redirectTo = "/login";
           return result;
         }
-
         const nowSec = Math.floor(Date.now() / 1000);
 
         // If we don't have an expiry or token is expired (or about to expire), try refresh.
@@ -197,9 +197,8 @@ export const authProvider = (): AuthProvider => {
           );
           if (typeof res !== "undefined") {
             result.success = true;
-            result.redirectTo = "/dashboard";
+            result.redirectTo = "/onboarding";
           }
-          console.log(res);
           return result;
         } else {
           throw new Error("Invalid provider");
@@ -234,24 +233,15 @@ export const authProvider = (): AuthProvider => {
           credentials: "include",
         },
       );
-      const resTenantUser = await client.find(
-        {
-          collection: "tenant-users",
-          where: {
-            user: {
-              equals: res.user.id,
-            },
-          },
-        },
-        {
-          // headers: { Authorization: `JWT ${token}` },
-          credentials: "include",
-        },
-      );
-      return {
-        user: res.user,
-        tenantUser: resTenantUser.docs[0],
+      const tenantUser = res.user.tenantUsers?.docs?.[tenantId as number] as
+        | TenantUser
+        | undefined;
+
+      const payload = {
+        ...res.user,
+        tenantUser: tenantUser || null,
       };
+      return payload;
     },
   };
   return result;

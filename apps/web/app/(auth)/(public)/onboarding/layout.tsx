@@ -16,9 +16,7 @@ export default function PanelLayout({
 }>) {
   return (
     <ThemeProvider defaultTheme="system" storageKey="rf-ui-theme">
-      <AuthRouteLayout>
-        <AppPanelLayout>{children}</AppPanelLayout>
-      </AuthRouteLayout>
+      <AuthRouteLayout>{children}</AuthRouteLayout>
     </ThemeProvider>
   );
 }

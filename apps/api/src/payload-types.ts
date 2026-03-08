@@ -227,6 +227,7 @@ export interface Tenant {
   slug?: string | null;
   status?: ('active' | 'suspended' | 'trial') | null;
   plan?: (number | null) | Plan;
+  logoUrl?: string | null;
   logoAsset?: (number | null) | Media;
   meta?:
     | {
@@ -349,8 +350,8 @@ export interface User {
  */
 export interface TenantUser {
   id: number;
-  tenant?: (number | null) | Tenant;
-  user?: (number | null) | User;
+  tenant: number | Tenant;
+  user: number | User;
   name?: string | null;
   email?: string | null;
   tenantName?: string | null;
@@ -828,6 +829,7 @@ export interface TenantsSelect<T extends boolean = true> {
   slug?: T;
   status?: T;
   plan?: T;
+  logoUrl?: T;
   logoAsset?: T;
   meta?: T;
   isDeleted?: T;

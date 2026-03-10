@@ -40,13 +40,16 @@ export default function RootLayout({
             notificationProvider={useNotificationProvider}
             resources={[
               {
-                name: "users",
+                name: "tenant-users",
                 list: "/orgs/:tenantId/users",
                 edit: "/orgs/:tenantId/users/edit/:id",
                 create: "/orgs/:tenantId/users/create",
+                meta: {
+                  label: "Users",
+                },
               },
               {
-                name: "tenant-users",
+                name: "customers",
                 list: "/orgs/:tenantId/members",
                 edit: "/orgs/:tenantId/members/edit/:id",
                 create: "/orgs/:tenantId/members/create",

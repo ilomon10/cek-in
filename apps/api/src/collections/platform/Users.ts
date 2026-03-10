@@ -47,6 +47,7 @@ export const Users: CollectionConfig = {
     {
       name: 'isPlatformAdmin',
       type: 'checkbox',
+      required: true,
       defaultValue: false,
       hooks: {
         beforeChange: [

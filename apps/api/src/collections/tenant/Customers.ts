@@ -10,6 +10,13 @@ export const Customers: CollectionConfig = {
       required: true,
     },
     {
+      name: 'memberId',
+      type: 'text',
+      unique: true,
+      required: true,
+      minLength: 4,
+    },
+    {
       name: 'name',
       type: 'text',
       required: true,
@@ -22,14 +29,19 @@ export const Customers: CollectionConfig = {
     {
       name: 'phone',
       type: 'text',
+      required: true,
     },
     {
       name: 'gender',
-      type: 'text',
+      type: 'radio',
+      options: [
+        { label: 'Male', value: 'male' },
+        { label: 'Female', value: 'female' },
+      ],
     },
     {
       name: 'birthDate',
-      type: 'text',
+      type: 'date',
     },
 
     {
@@ -42,6 +54,13 @@ export const Customers: CollectionConfig = {
     {
       name: 'meta',
       type: 'json',
+    },
+
+    {
+      name: 'entitlements',
+      type: 'join',
+      collection: 'entitlements',
+      on: 'customer',
     },
   ],
 }

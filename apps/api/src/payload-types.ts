@@ -98,6 +98,9 @@ export interface Config {
     users: {
       tenantUsers: 'tenant-users';
     };
+    customers: {
+      entitlements: 'entitlements';
+    };
     orders: {
       items: 'order-items';
     };
@@ -315,7 +318,7 @@ export interface User {
   id: number;
   name?: string | null;
   avatarAsset?: (number | null) | Media;
-  isPlatformAdmin?: boolean | null;
+  isPlatformAdmin: boolean;
   status?: ('active' | 'suspended') | null;
   meta?:
     | {
@@ -438,10 +441,11 @@ export interface PackageConfig {
 export interface Customer {
   id: number;
   tenant: number | Tenant;
+  memberId: string;
   name: string;
   email?: string | null;
-  phone?: string | null;
-  gender?: string | null;
+  phone: string;
+  gender?: ('male' | 'female') | null;
   birthDate?: string | null;
   avatarAsset?: (number | null) | Media;
   meta?:
@@ -453,40 +457,29 @@ export interface Customer {
     | number
     | boolean
     | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "devices".
- */
-export interface Device {
-  id: number;
-  name: string;
-  deviceType: 'qr_scanner' | 'gate' | 'tablet';
-  apiKey: string;
-  lastSeen?: string | null;
-  status?: string | null;
-  user?: (number | null) | User;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "orders".
- */
-export interface Order {
-  id: number;
-  tenant: number | Tenant;
-  customer: number | Customer;
-  items?: {
-    docs?: (number | OrderItem)[];
+  entitlements?: {
+    docs?: (number | Entitlement)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
-  invoiceNumber: string;
-  totalAmount?: number | null;
-  status?: ('pending' | 'paid' | 'cancelled' | 'refunded') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "entitlements".
+ */
+export interface Entitlement {
+  id: number;
+  tentant: number | Tenant;
+  customer: number | Customer;
+  product: number | Product;
+  orderItem: number | OrderItem;
+  startAt?: string | null;
+  endAt?: string | null;
+  remainingQuota?: number | null;
+  status: 'active' | 'expired' | 'used_up' | 'cancelled';
+  qrCode?: string | null;
   meta?:
     | {
         [k: string]: unknown;
@@ -523,19 +516,20 @@ export interface OrderItem {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "entitlements".
+ * via the `definition` "orders".
  */
-export interface Entitlement {
+export interface Order {
   id: number;
-  tentant: number | Tenant;
+  tenant: number | Tenant;
   customer: number | Customer;
-  product: number | Product;
-  orderItem: number | OrderItem;
-  startAt?: string | null;
-  endAt?: string | null;
-  remainingQuota?: number | null;
-  status: 'active' | 'expired' | 'used_up' | 'cancelled';
-  qrCode?: string | null;
+  items?: {
+    docs?: (number | OrderItem)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  invoiceNumber: string;
+  totalAmount?: number | null;
+  status?: ('pending' | 'paid' | 'cancelled' | 'refunded') | null;
   meta?:
     | {
         [k: string]: unknown;
@@ -545,6 +539,21 @@ export interface Entitlement {
     | number
     | boolean
     | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "devices".
+ */
+export interface Device {
+  id: number;
+  name: string;
+  deviceType: 'qr_scanner' | 'gate' | 'tablet';
+  apiKey: string;
+  lastSeen?: string | null;
+  status?: string | null;
+  user?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -909,6 +918,7 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface CustomersSelect<T extends boolean = true> {
   tenant?: T;
+  memberId?: T;
   name?: T;
   email?: T;
   phone?: T;
@@ -916,6 +926,7 @@ export interface CustomersSelect<T extends boolean = true> {
   birthDate?: T;
   avatarAsset?: T;
   meta?: T;
+  entitlements?: T;
   updatedAt?: T;
   createdAt?: T;
 }

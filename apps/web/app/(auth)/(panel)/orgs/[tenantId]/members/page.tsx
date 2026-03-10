@@ -51,7 +51,7 @@ export default function MemberList() {
         cell(props) {
           return (
             <Link
-              href={`/members/edit/${props.row.original.id}`}
+              href={`members/edit/${props.row.original.id}`}
               className="hover:underline"
             >
               {props.renderValue() as string}

@@ -142,18 +142,26 @@ export const Tenants: CollectionConfig = {
         })
 
         // Remove Tenant Users before delete Tenant
-        for (const member of res.members?.docs as number[]) {
+        for (const id of res.members?.docs as number[]) {
           await req.payload.delete({
             collection: 'tenant-users',
-            id: member,
+            id: id,
           })
         }
 
         // Remove Tenant Products before delete Tenant
-        for (const product of res.products?.docs as number[]) {
+        for (const id of res.products?.docs as number[]) {
           await req.payload.delete({
             collection: 'products',
-            id: product,
+            id: id,
+          })
+        }
+
+        // Remove Tenant Products before delete Tenant
+        for (const id of res.customers?.docs as number[]) {
+          await req.payload.delete({
+            collection: 'customers',
+            id: id,
           })
         }
       },

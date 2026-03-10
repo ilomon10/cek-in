@@ -62,8 +62,33 @@ export const Products: CollectionConfig = {
     },
 
     {
+      name: 'features',
+      type: 'array',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'description',
+          type: 'text',
+        },
+      ],
+    },
+
+    {
       name: 'meta',
       type: 'json',
+    },
+
+    {
+      name: 'isDeleted',
+      type: 'checkbox',
+    },
+    {
+      name: 'deletedAt',
+      type: 'date',
     },
   ],
 }

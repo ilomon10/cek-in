@@ -399,6 +399,13 @@ export interface Product {
   isActive?: boolean | null;
   config?: MembershipConfig | EventConfig | PackageConfig;
   thumbnailAsset?: (number | null) | Media;
+  features?:
+    | {
+        title: string;
+        description?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   meta?:
     | {
         [k: string]: unknown;
@@ -408,6 +415,8 @@ export interface Product {
     | number
     | boolean
     | null;
+  isDeleted?: boolean | null;
+  deletedAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1011,7 +1020,16 @@ export interface ProductsSelect<T extends boolean = true> {
   isActive?: T;
   config?: T;
   thumbnailAsset?: T;
+  features?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        id?: T;
+      };
   meta?: T;
+  isDeleted?: T;
+  deletedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

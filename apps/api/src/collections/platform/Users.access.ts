@@ -22,6 +22,5 @@ export const userAccessRead: Access<Partial<User>> = async ({ data, req }) => {
 }
 
 export const adminFieldAccess: FieldAccess = async ({ req }) => {
-  console.log('admin user', req.user)
   return !!req.user?.isPlatformAdmin
 }

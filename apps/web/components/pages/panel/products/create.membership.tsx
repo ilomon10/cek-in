@@ -1,9 +1,14 @@
 "use client";
 import { LoadingOverlay } from "@/components/refine-ui/layout/loading-overlay";
 import { useCreate } from "@refinedev/core";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormField, FormMessage } from "@repo/ui/components/ui/form";
+import {
+  Form,
+  FormField,
+  FormLabel,
+  FormMessage,
+} from "@repo/ui/components/ui/form";
 import { Button } from "@repo/ui/components/ui/button";
 import { useParams, useRouter } from "next/navigation";
 import { FormInput } from "@/components/pages/panel/form-input";
@@ -19,16 +24,31 @@ import {
   CardHeader,
   CardTitle,
 } from "@repo/ui/components/ui/card";
+import { Checkbox } from "@repo/ui/components/ui/checkbox";
+import { Label } from "@repo/ui/components/ui/label";
+import { Input } from "@repo/ui/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@repo/ui/components/ui/input-group";
+import { InfinityIcon, PlusIcon } from "lucide-react";
 
 export const productSchema = z.object({
   name: z.string().min(3),
   descriptions: z.string().optional(),
   price: z.coerce.number().int().min(1),
   currency: z.string(),
+  features: z.array(
+    z.object({
+      title: z.string(),
+    }),
+  ),
   config: z.object({
     type: z.literal("membership"),
     duration_days: z.coerce.number().int().min(1),
-    visit_limit: z.coerce.number().int().min(1).nullable().optional(),
+    visit_limit: z.coerce.number().int().min(-1).nullable().optional(),
     recurring: z.boolean().optional(),
     grace_period_days: z.coerce.number().int().min(1).optional(),
   }),
@@ -65,14 +85,20 @@ export default function ProductCreateMembershipForm() {
       descriptions: isDev ? faker.lorem.lines(3) : "",
       currency: "IDR",
       price: "",
+      features: [],
       config: {
         type: "membership",
         duration_days: 30,
         grace_period_days: undefined,
         recurring: undefined,
-        visit_limit: undefined,
+        visit_limit: -1,
       },
     },
+  });
+
+  const featureFields = useFieldArray({
+    control: form.control,
+    name: "features",
   });
 
   const handleSubmit = (values: ProductFormOutputData) => {
@@ -84,6 +110,7 @@ export default function ProductCreateMembershipForm() {
       currency: values.currency,
       price: values.price,
       config: values.config,
+      features: values.features,
     };
 
     mutate(
@@ -131,52 +158,56 @@ export default function ProductCreateMembershipForm() {
             placeholder="Enter your product price"
           />
 
-          <Card className="max-w-lg py-3 gap-3">
-            <CardHeader className="px-3">
-              <CardTitle>Monthly Visit Limit</CardTitle>
-              <CardDescription>
-                Limit how many times members can check in per month
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="px-3">
-              <FormInput
-                control={form.control}
-                type="input"
-                name="config.visit_limit"
-              />
-            </CardContent>
-          </Card>
-
-          <Separator className="max-w-xl" />
-
           <FormField
-            name="config"
-            control={form.control}
-            render={() => <FormMessage />}
-          />
-
-          <FormInput
             control={form.control}
             name="config.visit_limit"
-            type="input"
-            label="Visit Limit"
-            helperText="(optional)"
+            render={({ field }) => {
+              const isChecked = field.value != -1;
+              const handleChange = (value: boolean) => {
+                field.onChange(value ? 10 : -1);
+              };
+              return (
+                <Card className="max-w-lg py-3 gap-3">
+                  <label htmlFor="form-config_visit_limit">
+                    <CardHeader className="px-3">
+                      <CardTitle className="flex text-sm items-center font-semibold">
+                        <Checkbox
+                          id={"form-config_visit_limit"}
+                          className="mr-2"
+                          checked={isChecked}
+                          onCheckedChange={handleChange}
+                        />
+                        <span>This product has Monthly Visit Limit</span>
+                      </CardTitle>
+                      <CardDescription>
+                        Limit how many times members can check in per month
+                      </CardDescription>
+                    </CardHeader>
+                  </label>
+                  <CardContent className="px-3">
+                    {isChecked ? (
+                      <FormInput
+                        control={form.control}
+                        type="input"
+                        name="config.visit_limit"
+                      />
+                    ) : (
+                      <InputGroup>
+                        <InputGroupAddon>
+                          <InfinityIcon />
+                        </InputGroupAddon>
+                        <InputGroupInput
+                          defaultValue="Members can check-in in indefinitely per month"
+                          readOnly
+                        />
+                      </InputGroup>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            }}
           />
 
-          <FormInput
-            control={form.control}
-            name="config.grace_period_days"
-            type="input"
-            label="Grace Priod Days"
-            helperText="(optional)"
-          />
-          <FormInput
-            control={form.control}
-            name="config.recurring"
-            type="checkbox"
-            label="Recurring"
-            helperText="(optional)"
-          />
           <Separator className="max-w-xl" />
 
           <FormInput
@@ -187,6 +218,18 @@ export default function ProductCreateMembershipForm() {
             helperText={"(optional)"}
             placeholder="Enter your product description"
           />
+
+          {featureFields.fields.map((field, index) => {
+            const name = `features.${index}.title`;
+            console.log(field);
+            return <div key={name}>{field.title}</div>;
+          })}
+          <InputGroup className="max-w-lg">
+            <InputGroupInput />
+            <InputGroupButton>
+              <PlusIcon />
+            </InputGroupButton>
+          </InputGroup>
 
           <div className="flex space-x-2 mt-4">
             <Button type="button" variant="outline">

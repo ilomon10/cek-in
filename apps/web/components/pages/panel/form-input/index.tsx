@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@repo/ui/components/ui/select";
-import { Textarea } from "@repo/ui/components/ui/textarea";
+import { AutosizeTextarea } from "@repo/ui/components/ui/autosize-textarea";
 import { ControllerProps, FieldPath, FieldValues } from "react-hook-form";
 import {
   FormInputProps,
@@ -72,7 +72,7 @@ export const FormInput = <
       break;
     }
     case "textarea": {
-      renderInput = ({ field }) => <Textarea {...field} {...rest} />;
+      renderInput = ({ field }) => <AutosizeTextarea {...field} {...rest} />;
       break;
     }
     case "selector": {

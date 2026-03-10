@@ -13,7 +13,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: APP_NAME || "Undangon - Digital Invitation",
+  title: APP_NAME || "Cek In - Digital Invitation",
   description: APP_DESCRIPTION || "Digital Invitation",
 };
 

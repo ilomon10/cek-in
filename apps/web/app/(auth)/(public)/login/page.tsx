@@ -4,7 +4,7 @@ import { cn } from "@repo/ui/lib/utils";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: APP_NAME || "Login - Undangon",
+  title: APP_NAME || "Login - Cek In",
   description: APP_DESCRIPTION || "Digital Invitation",
 };
 
@@ -16,7 +16,7 @@ export default function LoginPage() {
         "items-center",
         "justify-center",
         "h-screen",
-        "w-screen"
+        "w-screen",
       )}
     >
       <LoginForm />

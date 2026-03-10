@@ -33,7 +33,7 @@ export const Products: CollectionConfig = {
     },
     {
       name: 'price',
-      type: 'text',
+      type: 'number',
       required: true,
       defaultValue: 0,
     },

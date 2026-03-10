@@ -1,6 +1,6 @@
 export const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL as string;
 export const APP_NAME =
-  (process.env.NEXT_PUBLIC_APP_NAME as string) || "Undangon";
+  (process.env.NEXT_PUBLIC_APP_NAME as string) || "Cek In";
 export const APP_DESCRIPTION = process.env
   .NEXT_PUBLIC_APP_DESCRIPTION as string;
 

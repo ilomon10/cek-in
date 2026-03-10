@@ -1,6 +1,6 @@
 "use client";
 
-import { TenantUser, User } from "@/components/providers/payload-types";
+import { TenantUser } from "@/components/providers/payload-types";
 import { DataTable } from "@/components/refine-ui/data-table/data-table";
 import { DataTableFilterDropdownText } from "@/components/refine-ui/data-table/data-table-filter";
 import { DataTableSorter } from "@/components/refine-ui/data-table/data-table-sorter";
@@ -13,7 +13,6 @@ import { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
 import { useMemo } from "react";
 import dayjs from "dayjs";
-import { EditIcon } from "lucide-react";
 import { useWithTenant } from "@/components/hooks/use-tenant";
 
 export default function MemberList() {

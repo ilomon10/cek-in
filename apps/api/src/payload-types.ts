@@ -394,7 +394,7 @@ export interface Product {
   name: string;
   descriptions?: string | null;
   productType: 'membership' | 'event' | 'package';
-  price: string;
+  price: number;
   currency: string;
   isActive?: boolean | null;
   config?: MembershipConfig | EventConfig | PackageConfig;

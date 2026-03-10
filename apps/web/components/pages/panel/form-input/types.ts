@@ -12,7 +12,7 @@ export type GeneralFormInput<
 > = {
   type: string;
   className?: string;
-  label: string;
+  label?: string;
   helperText?: string;
   description?: string;
   name: TName;
@@ -23,7 +23,7 @@ export type GeneralFormInput<
   placeholder?: string;
   // onChange?: (value: string | number) => void;
   // value: string;
-  control: Control<TFieldValues, TName, TTransformedValues>;
+  control: any;
 };
 export type InputFormInput<
   TFieldValues extends FieldValues = FieldValues,
@@ -45,6 +45,14 @@ export type SelectFormInput<
   TTransformedValues = TFieldValues,
 > = GeneralFormInput<TFieldValues, TName, TTransformedValues> & {
   type: "select";
+  options: Option[];
+};
+export type SelectorFormInput<
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+  TTransformedValues = TFieldValues,
+> = GeneralFormInput<TFieldValues, TName, TTransformedValues> & {
+  type: "selector";
   options: Option[];
 };
 export type RadioFormInput<
@@ -86,7 +94,9 @@ export type FormInputProps<
   | GeneralFormInput<TFieldValues, TName, TTransformedValues>
   | InputFormInput<TFieldValues, TName, TTransformedValues>
   | TextareaFormInput<TFieldValues, TName, TTransformedValues>
+  | SelectorFormInput<TFieldValues, TName, TTransformedValues>
   | SelectFormInput<TFieldValues, TName, TTransformedValues>
+  | CheckboxFormInput<TFieldValues, TName, TTransformedValues>
   | RadioFormInput<TFieldValues, TName, TTransformedValues>
   | TagsFormInput<TFieldValues, TName, TTransformedValues>
   | FileFormInput<TFieldValues, TName, TTransformedValues>;

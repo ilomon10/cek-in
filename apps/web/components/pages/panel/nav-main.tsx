@@ -22,6 +22,7 @@ import { FC } from "react";
 import Link from "next/link";
 import { checkRBAC } from "@/components/providers/utils/check-rbac";
 import { useUser } from "./auth-route";
+import { useParams } from "next/navigation";
 
 type Item = {
   title: string;
@@ -114,9 +115,10 @@ export function NavMain() {
 const MenuButton: FC<{
   item: Item;
 }> = ({ item, ...props }) => {
+  const { tenantId } = useParams();
   return (
     <SidebarMenuButton asChild {...props} tooltip={item.title}>
-      <Link href={item.url}>
+      <Link href={`/orgs/${tenantId}/${item.url}`}>
         {item.icon && <item.icon />}
         <span>{item.title}</span>
       </Link>

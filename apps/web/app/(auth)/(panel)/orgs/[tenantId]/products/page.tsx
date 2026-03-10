@@ -13,16 +13,18 @@ import { useTable } from "@refinedev/react-table";
 import { ColumnDef } from "@tanstack/react-table";
 import dayjs from "dayjs";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { useMemo } from "react";
 
 export default function ProductsList() {
   const tenant = useWithTenant();
+  const { tenantId } = useParams();
+
   const columns = useMemo<ColumnDef<Product>[]>(
     () => [
       {
-        // Column for ID field
         id: "id",
-        accessorKey: "id", // Maps to the 'id' field in your data
+        accessorKey: "id",
         header: ({ column }) => (
           <div className="flex items-center gap-1">
             <span>ID</span>
@@ -50,7 +52,7 @@ export default function ProductsList() {
         cell(props) {
           return (
             <Link
-              href={`/invitations/edit/${props.row.original.id}`}
+              href={`/orgs/${tenantId}/products/edit/${props.row.original.id}`}
               className="hover:underline"
             >
               {props.renderValue() as string}
@@ -67,9 +69,8 @@ export default function ProductsList() {
         },
       },
       {
-        // Column for status field
         id: "updatedAt",
-        accessorKey: "updatedAt", // Maps to the 'status' field in your data
+        accessorKey: "updatedAt",
         header: "Last Update at",
         cell(props) {
           const template = props.row.original;

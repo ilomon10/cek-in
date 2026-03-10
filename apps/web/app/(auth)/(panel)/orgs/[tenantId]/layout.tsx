@@ -6,7 +6,7 @@ import { ThemeProvider } from "@/components/refine-ui/theme/theme-provider";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: APP_NAME || "Panel - Undangon",
+  title: APP_NAME || "Panel - Cek In",
   description: APP_DESCRIPTION || "Digital Invitation",
 };
 

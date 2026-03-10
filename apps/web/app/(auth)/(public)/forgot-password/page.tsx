@@ -3,7 +3,7 @@ import { ForgotPasswordForm } from "@/components/refine-ui/form/forgot-password-
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: APP_NAME || "Forgot Password - Undangon",
+  title: APP_NAME || "Forgot Password - Cek In",
   description: APP_DESCRIPTION || "Digital Invitation",
 };
 

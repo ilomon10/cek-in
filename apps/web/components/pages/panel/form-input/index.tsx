@@ -23,6 +23,7 @@ import {
   FormInputProps,
   RadioFormInput,
   SelectFormInput,
+  SelectorFormInput,
   TagsFormInput,
 } from "./types";
 import { TagsInput } from "./tags-input";
@@ -36,6 +37,7 @@ import {
 } from "@repo/ui/components/ui/empty";
 import { Checkbox } from "@repo/ui/components/ui/checkbox";
 import { Label } from "@repo/ui/components/ui/label";
+import { Button } from "@repo/ui/components/ui/button";
 
 export const FormInput = <
   TFieldValues extends FieldValues = FieldValues,
@@ -71,6 +73,24 @@ export const FormInput = <
     }
     case "textarea": {
       renderInput = ({ field }) => <Textarea {...field} {...rest} />;
+      break;
+    }
+    case "selector": {
+      const { options } = props as SelectorFormInput;
+      renderInput = ({ field }) => (
+        <div className="grid grid-cols-3 gap-4">
+          {options.map(({ label, value }) => (
+            <Button
+              key={value}
+              type="button"
+              variant={field.value === value ? "default" : "outline"}
+              onClick={() => field.onChange(value)}
+            >
+              {label}
+            </Button>
+          ))}
+        </div>
+      );
       break;
     }
     case "select": {
@@ -153,11 +173,13 @@ export const FormInput = <
       name={name}
       render={(prop) => {
         return (
-          <FormItem className={cn("w-lg", className)}>
-            <FormLabel>
-              {label}
-              {helperText && <FormDescription>{helperText}</FormDescription>}
-            </FormLabel>
+          <FormItem className={cn("max-w-lg", className)}>
+            {label && (
+              <FormLabel>
+                {label}
+                {helperText && <FormDescription>{helperText}</FormDescription>}
+              </FormLabel>
+            )}
             <FormControl>
               {loading ? (
                 <Skeleton className="h-11 w-full" />

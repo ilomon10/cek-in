@@ -5,7 +5,9 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
+  FormControl,
   FormField,
+  FormItem,
   FormLabel,
   FormMessage,
 } from "@repo/ui/components/ui/form";
@@ -33,7 +35,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@repo/ui/components/ui/input-group";
-import { InfinityIcon, PlusIcon } from "lucide-react";
+import { InfinityIcon, MinusIcon, PlusIcon } from "lucide-react";
 
 export const productSchema = z.object({
   name: z.string().min(3),
@@ -85,7 +87,7 @@ export default function ProductCreateMembershipForm() {
       descriptions: isDev ? faker.lorem.lines(3) : "",
       currency: "IDR",
       price: "",
-      features: [],
+      features: [{ title: "Akses penuh area" }, { title: "Check-in QR code" }],
       config: {
         type: "membership",
         duration_days: 30,
@@ -192,8 +194,8 @@ export default function ProductCreateMembershipForm() {
                         name="config.visit_limit"
                       />
                     ) : (
-                      <InputGroup>
-                        <InputGroupAddon>
+                      <InputGroup className="text-purple-300 bg-purple-200 border-purple-500">
+                        <InputGroupAddon className="text-purple-500">
                           <InfinityIcon />
                         </InputGroupAddon>
                         <InputGroupInput
@@ -219,19 +221,41 @@ export default function ProductCreateMembershipForm() {
             placeholder="Enter your product description"
           />
 
-          {featureFields.fields.map((field, index) => {
-            const name = `features.${index}.title`;
-            console.log(field);
-            return <div key={name}>{field.title}</div>;
-          })}
-          <InputGroup className="max-w-lg">
-            <InputGroupInput />
-            <InputGroupButton>
-              <PlusIcon />
-            </InputGroupButton>
-          </InputGroup>
+          <FormField
+            control={form.control}
+            name="features"
+            render={() => (
+              <FormItem>
+                <FormLabel>Features</FormLabel>
+                {featureFields.fields.map((field, index) => {
+                  return (
+                    <FormField
+                      key={`features.${index}.title`}
+                      control={form.control}
+                      name={`features.${index}.title`}
+                      render={() => (
+                        <InputGroup className="max-w-lg">
+                          <InputGroupInput
+                            {...form.register(`features.${index}.title`)}
+                          />
+                          <InputGroupButton
+                            onClick={() => featureFields.remove(index)}
+                          >
+                            <MinusIcon />
+                          </InputGroupButton>
+                        </InputGroup>
+                      )}
+                    />
+                  );
+                })}
+                <Button variant={"secondary"} className="max-w-lg">
+                  <PlusIcon /> Add Feature
+                </Button>
+              </FormItem>
+            )}
+          />
 
-          <div className="flex space-x-2 mt-4">
+          <div className="flex space-x-2 mt-4 mb-[25vh]">
             <Button type="button" variant="outline">
               Cancel
             </Button>

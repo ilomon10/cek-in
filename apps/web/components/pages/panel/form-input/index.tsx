@@ -18,9 +18,15 @@ import {
   SelectValue,
 } from "@repo/ui/components/ui/select";
 import { AutosizeTextarea } from "@repo/ui/components/ui/autosize-textarea";
-import { ControllerProps, FieldPath, FieldValues } from "react-hook-form";
+import {
+  ControllerProps,
+  FieldPath,
+  FieldValues,
+  useFormContext,
+} from "react-hook-form";
 import {
   FormInputProps,
+  InputFormInput,
   RadioFormInput,
   SelectFormInput,
   SelectorFormInput,
@@ -60,10 +66,12 @@ export const FormInput = <
   let renderInput: ControllerProps["render"] = (props) => (
     <div {...props}>Please add type for FormInput {name}</div>
   );
+
   switch (type) {
     case "input": {
+      const { mask, ...r } = rest as InputFormInput;
       renderInput = ({ field }) => {
-        return <Input {...field} value={field.value || ""} {...rest} />;
+        return <Input {...field} value={field.value || ""} {...r} />;
       };
       break;
     }

@@ -46,7 +46,8 @@ export const TenantOnboarding = () => {
           <Button
             variant={"ghost"}
             onClick={handleBackStep}
-            disabled={!isDev && step === MAX_STEP - 1}
+            // disabled={!isDev && (step === MAX_STEP - 1 || step === 0)}
+            disabled={step === MAX_STEP - 1 || step === 0}
           >
             <ArrowLeftIcon />
           </Button>

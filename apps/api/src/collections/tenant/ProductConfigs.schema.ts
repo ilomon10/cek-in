@@ -18,7 +18,7 @@ export const productConfigsJSONSchema: JSONField['jsonSchema'] = {
           },
           visit_limit: {
             type: ['integer', 'null'],
-            minimum: 1,
+            minimum: -1,
           },
           recurring: {
             type: 'boolean',

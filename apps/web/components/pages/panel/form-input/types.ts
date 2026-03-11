@@ -1,4 +1,5 @@
 import { Control, FieldPath, FieldValues } from "react-hook-form";
+import { Mask, Options as MaskOptions } from "use-mask-input";
 
 export type Option = {
   label: string;
@@ -31,6 +32,7 @@ export type InputFormInput<
   TTransformedValues = TFieldValues,
 > = GeneralFormInput<TFieldValues, TName, TTransformedValues> & {
   type: "input";
+  mask?: { format: Mask; options?: MaskOptions };
 };
 export type TextareaFormInput<
   TFieldValues extends FieldValues = FieldValues,

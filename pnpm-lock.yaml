@@ -226,7 +226,7 @@ importers:
         specifier: ^19.2.4
         version: 19.2.4(react@19.2.4)
       react-hook-form:
-        specifier: ^7.71.2
+        specifier: ^7.57.0
         version: 7.71.2(react@19.2.4)
       recharts:
         specifier: 3.7.0

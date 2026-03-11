@@ -42,6 +42,7 @@ export const MemberCreateProductSelector: FC<{
         name,
         product: name,
         price,
+        type,
       };
       switch (type) {
         case "membership":
@@ -57,18 +58,21 @@ export const MemberCreateProductSelector: FC<{
 
   return (
     <div className="grid grid-cols-2 gap-4">
-      {products.map(({ id, name, product, price }) => {
+      {products.map(({ id, name, product, type, price }) => {
         return (
           <AspectRatio key={id} ratio={16 / 9}>
             <Button
               type="button"
               variant={value === id ? "default" : "outline"}
-              className="size-full justify-start"
+              className="size-full justify-start text-left"
               onClick={() => onSelect(id)}
             >
               <span className="flex flex-col items-start gap-2">
                 <span className="font-semibold text-md">{name}</span>
-                <span>{product}</span>
+                <span className="flex flex-col">
+                  <span className="capitalize text-xs">{type}</span>
+                  <span className="font-semibold text-md">{product}</span>
+                </span>
                 <span className="font-semibold text-lg">
                   {toCurrency(price)}
                 </span>

@@ -3,6 +3,9 @@ import { productConfigsJSONSchema } from './ProductConfigs.schema'
 
 export const Products: CollectionConfig = {
   slug: 'products',
+  admin: {
+    useAsTitle: 'name',
+  },
   fields: [
     {
       name: 'tenant',

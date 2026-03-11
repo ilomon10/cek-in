@@ -69,6 +69,15 @@ export type SelectorFormInput<
   options: Option[];
 };
 
+export type DateFormInput<
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+  TTransformedValues = TFieldValues,
+> = GeneralFormInput<TFieldValues, TName, TTransformedValues> & {
+  type: "date";
+  format: string;
+};
+
 export type RadioFormInput<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
@@ -108,13 +117,14 @@ export type FormInputProps<
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
   TTransformedValues = TFieldValues,
 > =
+  | CheckboxFormInput<TFieldValues, TName, TTransformedValues>
+  | DateFormInput<TFieldValues, TName, TTransformedValues>
+  | FileFormInput<TFieldValues, TName, TTransformedValues>
   | GeneralFormInput<TFieldValues, TName, TTransformedValues>
   | InputFormInput<TFieldValues, TName, TTransformedValues>
   | InputMaskFormInput<TFieldValues, TName, TTransformedValues>
-  | TextareaFormInput<TFieldValues, TName, TTransformedValues>
-  | SelectorFormInput<TFieldValues, TName, TTransformedValues>
-  | SelectFormInput<TFieldValues, TName, TTransformedValues>
-  | CheckboxFormInput<TFieldValues, TName, TTransformedValues>
   | RadioFormInput<TFieldValues, TName, TTransformedValues>
+  | SelectFormInput<TFieldValues, TName, TTransformedValues>
+  | SelectorFormInput<TFieldValues, TName, TTransformedValues>
   | TagsFormInput<TFieldValues, TName, TTransformedValues>
-  | FileFormInput<TFieldValues, TName, TTransformedValues>;
+  | TextareaFormInput<TFieldValues, TName, TTransformedValues>;

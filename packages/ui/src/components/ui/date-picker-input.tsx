@@ -1,8 +1,10 @@
 "use client";
 
 import * as React from "react";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
 import { Calendar } from "@repo/ui/components/ui/calendar";
-import { Field, FieldLabel } from "@repo/ui/components/ui/field";
 import {
   InputGroup,
   InputGroupAddon,
@@ -16,74 +18,120 @@ import {
 } from "@repo/ui/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
 
-function formatDate(date: Date | undefined) {
-  if (!date) {
-    return "";
-  }
+dayjs.extend(customParseFormat);
 
-  return date.toLocaleDateString("en-US", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
-}
-
-function isValidDate(date: Date | undefined) {
-  if (!date) {
-    return false;
-  }
-  return !isNaN(date.getTime());
-}
-
-export const DatePickerInput: React.FC<{
-  onChange?: (value: string) => void;
+type DatePickerInputProps = {
   value?: string;
-}> = ({ value: initialValue, onChange }) => {
+  onChange?: (value: string) => void;
+
+  format?: string;
+
+  id?: string;
+  name?: string;
+  placeholder?: string;
+
+  disabled?: boolean;
+  readOnly?: boolean;
+  required?: boolean;
+
+  onBlur?: React.FocusEventHandler<HTMLInputElement>;
+};
+
+export const DatePickerInput: React.FC<DatePickerInputProps> = ({
+  id,
+  name,
+  value: initialValue,
+  onChange,
+  onBlur,
+
+  format = "YYYY-MM-DD",
+  placeholder,
+
+  disabled,
+  readOnly,
+  required,
+}) => {
   const [open, setOpen] = React.useState(false);
-  const [date, setDate] = React.useState<Date | undefined>(
-    initialValue ? new Date(initialValue) : new Date(),
-  );
-  const [month, setMonth] = React.useState<Date | undefined>(date);
-  const [value, setValue] = React.useState(formatDate(date));
+
+  const parsed = React.useMemo(() => {
+    if (!initialValue) return undefined;
+
+    const d = dayjs(initialValue, format, true);
+    return d.isValid() ? d : undefined;
+  }, [initialValue, format]);
+
+  const [date, setDate] = React.useState<dayjs.Dayjs | undefined>(parsed);
 
   React.useEffect(() => {
-    onChange?.(value);
-  }, [value]);
+    if (!initialValue) return;
+
+    const d = dayjs(initialValue, format, true);
+    if (d.isValid()) setDate(d);
+  }, [initialValue, format]);
+
+  const inputValue = date ? date.format(format) : "";
+
+  const handleInputChange = (v: string) => {
+    if (readOnly || disabled) return;
+
+    const parsed = dayjs(v, format, true);
+
+    if (parsed.isValid()) {
+      setDate(parsed);
+      onChange?.(parsed.format(format));
+    }
+  };
+
+  const handleCalendarSelect = (d?: Date) => {
+    if (!d || readOnly || disabled) return;
+
+    const parsed = dayjs(d);
+
+    setDate(parsed);
+    onChange?.(parsed.format(format));
+    setOpen(false);
+  };
+
+  const handleOpenChange = (v: boolean) => {
+    if (disabled) return;
+    setOpen(v);
+  };
 
   return (
     <InputGroup>
       <InputGroupInput
-        id="date-required"
-        value={value}
-        placeholder="June 01, 2025"
-        onChange={(e) => {
-          const date = new Date(e.target.value);
-          setValue(e.target.value);
-          if (isValidDate(date)) {
-            setDate(date);
-            setMonth(date);
-          }
-        }}
+        id={id}
+        name={name}
+        value={inputValue}
+        placeholder={placeholder ?? format}
+        disabled={disabled}
+        readOnly={readOnly}
+        required={required}
+        onBlur={onBlur}
+        onChange={(e) => handleInputChange(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === "ArrowDown") {
+          if (e.key === "ArrowDown" && !disabled) {
             e.preventDefault();
             setOpen(true);
           }
         }}
       />
+
       <InputGroupAddon align="inline-end">
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover open={open} onOpenChange={handleOpenChange}>
           <PopoverTrigger asChild>
             <InputGroupButton
-              id="date-picker"
+              type="button"
               variant="ghost"
               size="icon-xs"
               aria-label="Select date"
+              disabled={disabled}
             >
               <CalendarIcon />
               <span className="sr-only">Select date</span>
             </InputGroupButton>
           </PopoverTrigger>
+
           <PopoverContent
             className="w-auto overflow-hidden p-0"
             align="end"
@@ -92,14 +140,11 @@ export const DatePickerInput: React.FC<{
           >
             <Calendar
               mode="single"
-              selected={date}
-              month={month}
-              onMonthChange={setMonth}
-              onSelect={(date) => {
-                setDate(date);
-                setValue(formatDate(date));
-                setOpen(false);
-              }}
+              selected={date?.toDate()}
+              month={date?.toDate()}
+              onMonthChange={(m) => setDate(dayjs(m))}
+              onSelect={handleCalendarSelect}
+              disabled={disabled}
             />
           </PopoverContent>
         </Popover>

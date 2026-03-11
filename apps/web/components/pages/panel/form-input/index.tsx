@@ -25,6 +25,7 @@ import {
   useFormContext,
 } from "react-hook-form";
 import {
+  DateFormInput,
   FormInputProps,
   InputFormInput,
   InputMaskFormInput,
@@ -46,6 +47,7 @@ import { Checkbox } from "@repo/ui/components/ui/checkbox";
 import { Label } from "@repo/ui/components/ui/label";
 import { Button } from "@repo/ui/components/ui/button";
 import { InputMask } from "@repo/ui/components/ui/input-mask";
+import { DatePickerInput } from "@repo/ui/components/ui/date-picker-input";
 
 export const FormInput = <
   TFieldValues extends FieldValues = FieldValues,
@@ -65,8 +67,11 @@ export const FormInput = <
     disabled: _disabled,
     ...rest
   } = props;
+
   let renderInput: ControllerProps["render"] = (props) => (
-    <div {...props}>Please add type for FormInput {name}</div>
+    <div {...props}>
+      Please add type `{type}` for FormInput {name}
+    </div>
   );
 
   switch (type) {
@@ -88,6 +93,17 @@ export const FormInput = <
     }
     case "textarea": {
       renderInput = ({ field }) => <AutosizeTextarea {...field} {...rest} />;
+      break;
+    }
+    case "date": {
+      const rest = props as DateFormInput;
+      renderInput = ({ field }) => (
+        <DatePickerInput
+          {...rest}
+          value={field.value}
+          onChange={(v) => field.onChange(v)}
+        />
+      );
       break;
     }
     case "selector": {
@@ -198,7 +214,9 @@ export const FormInput = <
             {label && (
               <FormLabel>
                 {label}
-                {helperText && <FormDescription>{helperText}</FormDescription>}
+                {helperText && (
+                  <span className="text-muted-foreground">{helperText}</span>
+                )}
               </FormLabel>
             )}
             <FormControl>

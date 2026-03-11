@@ -1,54 +1,33 @@
 "use client";
 import { LoadingOverlay } from "@/components/refine-ui/layout/loading-overlay";
 import { useCreate } from "@refinedev/core";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@repo/ui/components/ui/form";
+import { Form, FormField } from "@repo/ui/components/ui/form";
 import { Button } from "@repo/ui/components/ui/button";
 import { useParams, useRouter } from "next/navigation";
 import { FormInput } from "@/components/pages/panel/form-input";
 import { fakerID_ID as faker } from "@faker-js/faker";
 import { isDev } from "@/components/hooks/utils";
-import { Separator } from "@repo/ui/components/ui/separator";
 import { useWithTenant } from "@/components/hooks/use-tenant";
 import * as z from "zod";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@repo/ui/components/ui/card";
-import { Checkbox } from "@repo/ui/components/ui/checkbox";
-import { Label } from "@repo/ui/components/ui/label";
-import { Input } from "@repo/ui/components/ui/input";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from "@repo/ui/components/ui/input-group";
-import { InfinityIcon, MinusIcon, PlusIcon } from "lucide-react";
-import { Customer } from "@/components/providers/payload-types";
 import slugify from "slugify";
 import { generateSimpleHash } from "@repo/ui/lib/generate-simple-hash";
 import { generateId } from "@repo/ui/lib/generate-id";
-import { Field, FieldContent, FieldLabel } from "@repo/ui/components/ui/field";
+import {
+  Field,
+  FieldContent,
+  FieldError,
+  FieldLabel,
+} from "@repo/ui/components/ui/field";
 import { MemberCreateProductSelector } from "./create.product-selector";
+import { Separator } from "@repo/ui/components/ui/separator";
 
 export const memberSchema = z.object({
   name: z.string().min(3),
   email: z.email().optional(),
   phone: z.string(),
-  gender: z.string(),
-  birthDate: z.string(),
+  startDate: z.string(),
 
   product: z.number(),
 });
@@ -75,7 +54,8 @@ export default function MemberCreateForm() {
       email: isDev
         ? `${slugify(faker.person.firstName(), { lower: true })}@example.com`
         : "",
-      gender: "male",
+      product: undefined,
+      startDate: undefined,
     },
   });
 
@@ -86,22 +66,23 @@ export default function MemberCreateForm() {
       name: values.name,
       phone: values.phone,
       email: values.email,
-      gender: values.gender,
       tenant: tenant.id,
       memberId,
     };
 
-    mutate(
-      { values: result },
-      {
-        onSettled(data) {
-          if (data?.data) {
-            const { id } = data.data as any;
-            router.replace(`/orgs/${tenantId}/products/edit/${id}`);
-          }
-        },
-      },
-    );
+    console.log(values);
+
+    // mutate(
+    //   { values: result },
+    //   {
+    //     onSettled(data) {
+    //       if (data?.data) {
+    //         const { id } = data.data as any;
+    //         router.replace(`/orgs/${tenantId}/products/edit/${id}`);
+    //       }
+    //     },
+    //   },
+    // );
   };
 
   return (
@@ -119,50 +100,80 @@ export default function MemberCreateForm() {
             label="Name"
             placeholder="Enter name"
           />
+          <div className="flex items-start gap-4 max-w-lg">
+            <FormInput
+              control={form.control}
+              name="phone"
+              type="input-mask"
+              label="Phone"
+              className="w-1/2"
+              placeholder="Enter phone number"
+              mask={{
+                mask: [
+                  "+00 000-000-000",
+                  "+00 000-0000-0000",
+                  "+00 000-0000-00000",
+                  "+00 000-00000-00000",
+                ],
+              }}
+              description="Example: +62 (Indonesia), +81 (Japan), +1 (USA), +44 (UK)"
+            />
 
-          <FormInput
-            control={form.control}
-            name="phone"
-            type="input"
-            label="Phone"
-            placeholder="Enter phone number"
-          />
+            <FormInput
+              control={form.control}
+              name="email"
+              type="input"
+              label="Email"
+              helperText="(optional)"
+              className="w-1/2"
+              placeholder="Enter email"
+            />
+          </div>
 
-          <FormInput
-            control={form.control}
-            name="email"
-            type="input"
-            label="Email"
-            placeholder="Enter email"
-          />
-
-          <FormInput
-            control={form.control}
-            name="gender"
-            type="radio"
-            label="Gender"
-            placeholder="Enter email"
-            options={[
-              { label: "Male", value: "male" },
-              { label: "Female", value: "female" },
-            ]}
-          />
+          <Separator />
 
           <FormField
             control={form.control}
             name="product"
-            render={({ field }) => (
-              <Field className="max-w-lg">
-                <FieldLabel>Paket Membership</FieldLabel>
+            render={({ field, fieldState }) => (
+              <Field className="max-w-lg" data-invalid={fieldState.invalid}>
+                <FieldLabel>Product</FieldLabel>
                 <FieldContent>
                   <MemberCreateProductSelector
+                    aria-invalid={fieldState.invalid}
                     value={field.value}
                     onSelect={field.onChange}
                   />
                 </FieldContent>
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
               </Field>
             )}
           />
+
+          <Separator />
+
+          <div className="flex items-start gap-4 max-w-lg">
+            <FormInput
+              control={form.control}
+              name="startDate"
+              type="date"
+              label="Start Date"
+              format="DD/MM/YYYY"
+              className="w-1/2"
+            />
+            <FormInput
+              control={form.control}
+              name="endDate"
+              type="date"
+              label="Estimate End Date"
+              helperText="(generated)"
+              format="DD/MM/YYYY"
+              className="w-1/2"
+              readOnly
+            />
+          </div>
 
           <div className="flex space-x-2 mt-4 mb-[25vh]">
             <Button type="button" variant="outline">

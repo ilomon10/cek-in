@@ -45,7 +45,7 @@ export const productSchema = z.object({
   ),
   config: z.object({
     type: z.literal("membership"),
-    duration_days: z.coerce.number().int().min(1),
+    duration_days: z.coerce.number().int().min(-1),
     visit_limit: z.coerce.number().int().min(-1).nullable().optional(),
     recurring: z.boolean().optional(),
     grace_period_days: z.coerce.number().int().min(1).optional(),
@@ -63,7 +63,8 @@ export const MEMBERSHIP_DURATIONS = [
   { label: "1 Month", value: 30 },
   { label: "3 Months", value: 30 * 3 },
   { label: "6 Months", value: 30 * 6 },
-  { label: "1 Year", value: 356 },
+  { label: "1 Year", value: 365 },
+  { label: "Lifetime", value: -1 },
 ];
 
 export default function ProductCreateMembershipForm() {

@@ -67,6 +67,8 @@ export type SelectorFormInput<
 > = GeneralFormInput<TFieldValues, TName, TTransformedValues> & {
   type: "selector";
   options: Option[];
+
+  listClassName?: string;
 };
 
 export type DateFormInput<

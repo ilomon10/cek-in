@@ -14,7 +14,7 @@ export const productConfigsJSONSchema: JSONField['jsonSchema'] = {
           },
           duration_days: {
             type: 'integer',
-            minimum: 1,
+            minimum: -1,
           },
           visit_limit: {
             type: ['integer', 'null'],

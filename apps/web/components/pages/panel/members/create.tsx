@@ -22,169 +22,34 @@ import {
 } from "@repo/ui/components/ui/field";
 import { MemberCreateProductSelector } from "./create.product-selector";
 import { Separator } from "@repo/ui/components/ui/separator";
-
-export const memberSchema = z.object({
-  name: z.string().min(3),
-  email: z.email().optional(),
-  phone: z.string(),
-  startDate: z.string(),
-
-  product: z.number(),
-});
-
-type MemberFormData = z.infer<typeof memberSchema>;
-type MemberFormInputData = z.input<typeof memberSchema>;
-type MemberFormOutputData = z.output<typeof memberSchema>;
+import { useEffect, useState } from "react";
+import dayjs from "dayjs";
+import { ProductSchema, productSchema } from "../products/product.schema";
+import MemberCreateMembershipForm from "./create.membership";
+import { memberConfigSchema } from "./member.schema";
+import {
+  CreateView,
+  CreateViewHeader,
+} from "@/components/refine-ui/views/create-view";
+import { Product } from "@/components/providers/payload-types";
 
 export default function MemberCreateForm() {
-  const tenant = useWithTenant();
-  const { tenantId } = useParams();
-  const router = useRouter();
-
-  const {
-    mutate,
-    mutation: { isPending },
-  } = useCreate<MemberFormData>({ resource: "products" });
-
-  const form = useForm<MemberFormInputData, any, MemberFormOutputData>({
-    resolver: zodResolver(memberSchema),
-    defaultValues: {
-      name: isDev ? faker.person.firstName() : "",
-      phone: isDev ? faker.phone.number() : "",
-      email: isDev
-        ? `${slugify(faker.person.firstName(), { lower: true })}@example.com`
-        : "",
-      product: undefined,
-      startDate: undefined,
-    },
-  });
-
-  const handleSubmit = (values: MemberFormOutputData) => {
-    const memberId = `CI${generateSimpleHash(generateId(), true)}`;
-
-    const result = {
-      name: values.name,
-      phone: values.phone,
-      email: values.email,
-      tenant: tenant.id,
-      memberId,
-    };
-
-    console.log(values);
-
-    // mutate(
-    //   { values: result },
-    //   {
-    //     onSettled(data) {
-    //       if (data?.data) {
-    //         const { id } = data.data as any;
-    //         router.replace(`/orgs/${tenantId}/products/edit/${id}`);
-    //       }
-    //     },
-    //   },
-    // );
-  };
-
+  const [product, setProduct] = useState<Product | null>(null);
   return (
-    <LoadingOverlay loading={isPending}>
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(handleSubmit)}
-          className="pl-12 px-4 flex flex-col gap-5"
-        >
-          {isDev && JSON.stringify(form.formState.errors)}
-          <FormInput
-            control={form.control}
-            name="name"
-            type="input"
-            label="Name"
-            placeholder="Enter name"
-          />
-          <div className="flex items-start gap-4 max-w-lg">
-            <FormInput
-              control={form.control}
-              name="phone"
-              type="input-mask"
-              label="Phone"
-              className="w-1/2"
-              placeholder="Enter phone number"
-              mask={{
-                mask: [
-                  "+00 000-000-000",
-                  "+00 000-0000-0000",
-                  "+00 000-0000-00000",
-                  "+00 000-00000-00000",
-                ],
-              }}
-              description="Example: +62 (Indonesia), +81 (Japan), +1 (USA), +44 (UK)"
-            />
+    <CreateView>
+      <CreateViewHeader title="Create new Member" />
+      {product === null && (
+        <Field className="mx-12 max-w-lg">
+          <FieldLabel>Select Product</FieldLabel>
+          <FieldContent>
+            <MemberCreateProductSelector onSelect={setProduct} />
+          </FieldContent>
+        </Field>
+      )}
 
-            <FormInput
-              control={form.control}
-              name="email"
-              type="input"
-              label="Email"
-              helperText="(optional)"
-              className="w-1/2"
-              placeholder="Enter email"
-            />
-          </div>
-
-          <Separator />
-
-          <FormField
-            control={form.control}
-            name="product"
-            render={({ field, fieldState }) => (
-              <Field className="max-w-lg" data-invalid={fieldState.invalid}>
-                <FieldLabel>Product</FieldLabel>
-                <FieldContent>
-                  <MemberCreateProductSelector
-                    aria-invalid={fieldState.invalid}
-                    value={field.value}
-                    onSelect={field.onChange}
-                  />
-                </FieldContent>
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-
-          <Separator />
-
-          <div className="flex items-start gap-4 max-w-lg">
-            <FormInput
-              control={form.control}
-              name="startDate"
-              type="date"
-              label="Start Date"
-              format="DD/MM/YYYY"
-              className="w-1/2"
-            />
-            <FormInput
-              control={form.control}
-              name="endDate"
-              type="date"
-              label="Estimate End Date"
-              helperText="(generated)"
-              format="DD/MM/YYYY"
-              className="w-1/2"
-              readOnly
-            />
-          </div>
-
-          <div className="flex space-x-2 mt-4 mb-[25vh]">
-            <Button type="button" variant="outline">
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isPending}>
-              {isPending ? "Creating..." : "Create Product"}
-            </Button>
-          </div>
-        </form>
-      </Form>
-    </LoadingOverlay>
+      {product?.productType === "membership" && (
+        <MemberCreateMembershipForm product={product} />
+      )}
+    </CreateView>
   );
 }

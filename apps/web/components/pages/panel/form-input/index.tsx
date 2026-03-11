@@ -107,9 +107,9 @@ export const FormInput = <
       break;
     }
     case "selector": {
-      const { options } = props as SelectorFormInput;
+      const { options, listClassName } = props as SelectorFormInput;
       renderInput = ({ field }) => (
-        <div className="grid grid-cols-3 gap-4">
+        <div className={cn("grid grid-cols-3 gap-4", listClassName)}>
           {options.map(({ label, value }) => (
             <Button
               key={value}

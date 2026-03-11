@@ -54,7 +54,7 @@ export const productSchema = z.object({
   ),
   config: z.object({
     type: z.literal("membership"),
-    duration_days: z.coerce.number().int().min(1),
+    duration_days: z.coerce.number().int().min(-1),
     visit_limit: z.coerce.number().int().min(-1).nullable().optional(),
     recurring: z.boolean().optional(),
     grace_period_days: z.coerce.number().int().min(1).optional(),

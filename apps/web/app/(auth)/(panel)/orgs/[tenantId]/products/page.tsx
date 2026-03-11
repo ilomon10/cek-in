@@ -1,7 +1,7 @@
 "use client";
 
-import { useTenant, useWithTenant } from "@/components/hooks/use-tenant";
-import { Product, User } from "@/components/providers/payload-types";
+import { useWithTenant } from "@/components/hooks/use-tenant";
+import { Product } from "@/components/providers/payload-types";
 import { DataTable } from "@/components/refine-ui/data-table/data-table";
 import { DataTableFilterDropdownText } from "@/components/refine-ui/data-table/data-table-filter";
 import { DataTableSorter } from "@/components/refine-ui/data-table/data-table-sorter";
@@ -9,6 +9,7 @@ import {
   ListView,
   ListViewHeader,
 } from "@/components/refine-ui/views/list-view";
+import { toCurrency } from "@/components/utils/toCurrency";
 import { useTable } from "@refinedev/react-table";
 import { ColumnDef } from "@tanstack/react-table";
 import dayjs from "dayjs";
@@ -65,7 +66,7 @@ export default function ProductsList() {
         accessorKey: "price",
         header: "Price",
         cell(props) {
-          return props.getValue();
+          return toCurrency(props.getValue());
         },
       },
       {

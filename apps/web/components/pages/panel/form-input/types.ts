@@ -1,5 +1,6 @@
-import { Control, FieldPath, FieldValues } from "react-hook-form";
-import { Mask, Options as MaskOptions } from "use-mask-input";
+import { FactoryOpts } from "imask";
+import { MaskOptions } from "maska";
+import { FieldPath, FieldValues } from "react-hook-form";
 
 export type Option = {
   label: string;
@@ -32,8 +33,16 @@ export type InputFormInput<
   TTransformedValues = TFieldValues,
 > = GeneralFormInput<TFieldValues, TName, TTransformedValues> & {
   type: "input";
-  mask?: { format: Mask; options?: MaskOptions };
 };
+export type InputMaskFormInput<
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+  TTransformedValues = TFieldValues,
+> = GeneralFormInput<TFieldValues, TName, TTransformedValues> & {
+  type: "input-mask";
+  mask: FactoryOpts;
+};
+
 export type TextareaFormInput<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
@@ -41,6 +50,7 @@ export type TextareaFormInput<
 > = GeneralFormInput<TFieldValues, TName, TTransformedValues> & {
   type: "textarea";
 };
+
 export type SelectFormInput<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
@@ -49,6 +59,7 @@ export type SelectFormInput<
   type: "select";
   options: Option[];
 };
+
 export type SelectorFormInput<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
@@ -57,6 +68,7 @@ export type SelectorFormInput<
   type: "selector";
   options: Option[];
 };
+
 export type RadioFormInput<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
@@ -65,6 +77,7 @@ export type RadioFormInput<
   type: "radio";
   options: Option[];
 };
+
 export type CheckboxFormInput<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
@@ -72,6 +85,7 @@ export type CheckboxFormInput<
 > = GeneralFormInput<TFieldValues, TName, TTransformedValues> & {
   type: "checkbox";
 };
+
 export type FileFormInput<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
@@ -79,6 +93,7 @@ export type FileFormInput<
 > = GeneralFormInput<TFieldValues, TName, TTransformedValues> & {
   type: "file";
 };
+
 export type TagsFormInput<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
@@ -95,6 +110,7 @@ export type FormInputProps<
 > =
   | GeneralFormInput<TFieldValues, TName, TTransformedValues>
   | InputFormInput<TFieldValues, TName, TTransformedValues>
+  | InputMaskFormInput<TFieldValues, TName, TTransformedValues>
   | TextareaFormInput<TFieldValues, TName, TTransformedValues>
   | SelectorFormInput<TFieldValues, TName, TTransformedValues>
   | SelectFormInput<TFieldValues, TName, TTransformedValues>

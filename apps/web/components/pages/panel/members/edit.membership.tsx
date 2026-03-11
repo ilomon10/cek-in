@@ -35,7 +35,7 @@ import {
   InputGroupInput,
 } from "@repo/ui/components/ui/input-group";
 import { Separator } from "@repo/ui/components/ui/separator";
-import { InfinityIcon, MinusIcon, PlusIcon, XIcon } from "lucide-react";
+import { InfinityIcon, MinusIcon, PlusIcon } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useFieldArray } from "react-hook-form";
 import * as z from "zod";
@@ -155,20 +155,10 @@ export default function ProductEditMembershipForm() {
 
             <FormInput
               control={form.control}
-              type="input-mask"
+              type="input"
               name="price"
               label="Price"
               placeholder="Enter your product price"
-              mask={{
-                mask: "Rp num",
-                blocks: {
-                  num: {
-                    mask: Number,
-                    thousandsSeparator: ".",
-                    scale: 0,
-                  },
-                },
-              }}
             />
 
             <FormField
@@ -252,7 +242,7 @@ export default function ProductEditMembershipForm() {
                             <InputGroupButton
                               onClick={() => featureFields.remove(index)}
                             >
-                              <XIcon />
+                              <MinusIcon />
                             </InputGroupButton>
                           </InputGroup>
                         )}

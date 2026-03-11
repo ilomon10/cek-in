@@ -27,6 +27,7 @@ import {
 import {
   FormInputProps,
   InputFormInput,
+  InputMaskFormInput,
   RadioFormInput,
   SelectFormInput,
   SelectorFormInput,
@@ -44,6 +45,7 @@ import {
 import { Checkbox } from "@repo/ui/components/ui/checkbox";
 import { Label } from "@repo/ui/components/ui/label";
 import { Button } from "@repo/ui/components/ui/button";
+import { InputMask } from "@repo/ui/components/ui/input-mask";
 
 export const FormInput = <
   TFieldValues extends FieldValues = FieldValues,
@@ -69,9 +71,14 @@ export const FormInput = <
 
   switch (type) {
     case "input": {
-      const { mask, ...r } = rest as InputFormInput;
       renderInput = ({ field }) => {
-        return <Input {...field} value={field.value || ""} {...r} />;
+        return <Input {...field} value={field.value || ""} {...rest} />;
+      };
+      break;
+    }
+    case "input-mask": {
+      renderInput = ({ field }) => {
+        return <InputMask {...field} {...(rest as InputMaskFormInput)} />;
       };
       break;
     }
@@ -138,7 +145,13 @@ export const FormInput = <
       renderInput = ({ field }) => (
         <RadioGroup {...field}>
           {options.map(({ label, value }) => (
-            <RadioGroupItem value={value as string}>{label}</RadioGroupItem>
+            <Label>
+              <RadioGroupItem
+                value={value as string}
+                onClick={() => field.onChange(value)}
+              />
+              {label}
+            </Label>
           ))}
         </RadioGroup>
       );

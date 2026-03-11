@@ -5,11 +5,9 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
-  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from "@repo/ui/components/ui/form";
 import { Button } from "@repo/ui/components/ui/button";
 import { useParams, useRouter } from "next/navigation";
@@ -27,15 +25,13 @@ import {
   CardTitle,
 } from "@repo/ui/components/ui/card";
 import { Checkbox } from "@repo/ui/components/ui/checkbox";
-import { Label } from "@repo/ui/components/ui/label";
-import { Input } from "@repo/ui/components/ui/input";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
 } from "@repo/ui/components/ui/input-group";
-import { InfinityIcon, MinusIcon, PlusIcon } from "lucide-react";
+import { InfinityIcon, MinusIcon, PlusIcon, XIcon } from "lucide-react";
 
 export const productSchema = z.object({
   name: z.string().min(3),
@@ -154,10 +150,20 @@ export default function ProductCreateMembershipForm() {
 
           <FormInput
             control={form.control}
-            type="input"
+            type="input-mask"
             name="price"
             label="Price"
             placeholder="Enter your product price"
+            mask={{
+              mask: "Rp num",
+              blocks: {
+                num: {
+                  mask: Number,
+                  thousandsSeparator: ".",
+                  scale: 0,
+                },
+              },
+            }}
           />
 
           <FormField
@@ -241,7 +247,7 @@ export default function ProductCreateMembershipForm() {
                           <InputGroupButton
                             onClick={() => featureFields.remove(index)}
                           >
-                            <MinusIcon />
+                            <XIcon />
                           </InputGroupButton>
                         </InputGroup>
                       )}

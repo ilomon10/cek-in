@@ -50,5 +50,31 @@ export const OrderItems: CollectionConfig = {
       name: 'meta',
       type: 'json',
     },
+
+    {
+      name: 'entitlements',
+      type: 'join',
+      collection: 'entitlements',
+      on: 'orderItem',
+    },
   ],
+  hooks: {
+    beforeDelete: [
+      async ({ id, req, context }) => {
+        const res = await req.payload.findByID({
+          collection: 'order-items',
+          id: id,
+          depth: 0,
+        })
+
+        // Remove Tenant Users before delete Tenant
+        for (const id of res.entitlements?.docs as number[]) {
+          await req.payload.delete({
+            collection: 'entitlements',
+            id: id,
+          })
+        }
+      },
+    ],
+  },
 }

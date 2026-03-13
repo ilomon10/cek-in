@@ -12,6 +12,9 @@ export const Products: CollectionConfig = {
       type: 'relationship',
       relationTo: 'tenants',
       required: true,
+      admin: {
+        position: 'sidebar',
+      },
     },
     {
       name: 'name',

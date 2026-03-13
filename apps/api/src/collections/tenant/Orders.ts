@@ -13,6 +13,9 @@ export const Orders: CollectionConfig = {
       type: 'relationship',
       relationTo: 'tenants',
       required: true,
+      admin: {
+        position: 'sidebar',
+      },
     },
     {
       name: 'customer',
@@ -42,7 +45,6 @@ export const Orders: CollectionConfig = {
             })
             const currentDate = dayjs()
             const invNo = `INV/${currentDate.format('YYYYMMDD')}/${numberToRoman(Number(currentDate.format('MM')))}/${lastInvoice.totalDocs + 1}`
-            console.log('beforeRead', invNo, lastInvoice)
             return invNo
           },
         ],
@@ -68,5 +70,54 @@ export const Orders: CollectionConfig = {
       name: 'meta',
       type: 'json',
     },
+
+    {
+      name: 'seats',
+      type: 'join',
+      collection: 'seat-reservations',
+      on: 'order',
+    },
+
+    {
+      name: 'payments',
+      type: 'join',
+      collection: 'payments',
+      on: 'order',
+    },
   ],
+  hooks: {
+    beforeDelete: [
+      async ({ id, req }) => {
+        const res = await req.payload.findByID({
+          collection: 'orders',
+          id: id,
+          depth: 0,
+        })
+
+        // Remove Order Items before delete Order
+        for (const id of res.items?.docs as number[]) {
+          await req.payload.delete({
+            collection: 'order-items',
+            id: id,
+          })
+        }
+
+        // Remove Seats before delete Order
+        for (const id of res.seats?.docs as number[]) {
+          await req.payload.delete({
+            collection: 'seat-reservations',
+            id: id,
+          })
+        }
+
+        // Remove Payments before delete Order
+        for (const id of res.payments?.docs as number[]) {
+          await req.payload.delete({
+            collection: 'payments',
+            id: id,
+          })
+        }
+      },
+    ],
+  },
 }

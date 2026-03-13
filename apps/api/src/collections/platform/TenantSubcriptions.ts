@@ -10,6 +10,9 @@ export const TentantSubscriptions: CollectionConfig = {
       name: 'tenant',
       type: 'relationship',
       relationTo: 'tenants',
+      admin: {
+        position: 'sidebar',
+      },
     },
     {
       name: 'planName',

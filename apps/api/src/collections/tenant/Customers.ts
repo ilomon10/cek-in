@@ -11,6 +11,9 @@ export const Customers: CollectionConfig = {
       type: 'relationship',
       relationTo: 'tenants',
       required: true,
+      admin: {
+        position: 'sidebar',
+      },
     },
     {
       name: 'memberId',
@@ -75,5 +78,59 @@ export const Customers: CollectionConfig = {
         defaultColumns: ['invoiceNumber', 'status', 'items', 'totalAmount'],
       },
     },
+
+    {
+      name: 'subscriptions',
+      type: 'join',
+      collection: 'subscriptions',
+      on: 'customer',
+      admin: {
+        defaultColumns: ['invoiceNumber', 'status', 'items', 'totalAmount'],
+      },
+    },
+
+    {
+      name: 'checkInLogs',
+      type: 'join',
+      collection: 'checkin-logs',
+      on: 'customer',
+      admin: {
+        defaultColumns: ['invoiceNumber', 'status', 'items', 'totalAmount'],
+      },
+    },
   ],
+  hooks: {
+    beforeDelete: [
+      async ({ id, req, context }) => {
+        const res = await req.payload.findByID({
+          collection: 'customers',
+          id: id,
+          depth: 0,
+        })
+        // Remove `Orders` before delete Customer
+        for (const id of res.orders?.docs as number[]) {
+          await req.payload.delete({
+            collection: 'orders',
+            id: id,
+          })
+        }
+
+        // Remove `Orders` before delete Customer
+        for (const id of res.entitlements?.docs as number[]) {
+          await req.payload.delete({
+            collection: 'entitlements',
+            id: id,
+          })
+        }
+
+        // Remove `Subscriptions` before delete Customer
+        for (const id of res.subscriptions?.docs as number[]) {
+          await req.payload.delete({
+            collection: 'subscriptions',
+            id: id,
+          })
+        }
+      },
+    ],
+  },
 }

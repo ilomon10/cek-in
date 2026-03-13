@@ -14,6 +14,9 @@ export const TenantUsers: CollectionConfig = {
       type: 'relationship',
       relationTo: 'tenants',
       required: true,
+      admin: {
+        position: 'sidebar',
+      },
     },
     {
       name: 'user',

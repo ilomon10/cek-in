@@ -8,6 +8,9 @@ export const Entitlements: CollectionConfig = {
       type: 'relationship',
       relationTo: 'tenants',
       required: true,
+      admin: {
+        position: 'sidebar',
+      },
     },
 
     {
@@ -65,5 +68,31 @@ export const Entitlements: CollectionConfig = {
       name: 'meta',
       type: 'json',
     },
+
+    {
+      name: 'checkInLogs',
+      type: 'join',
+      collection: 'checkin-logs',
+      on: 'entitlement',
+    },
   ],
+
+  hooks: {
+    beforeDelete: [
+      async ({ id, req, context }) => {
+        const res = await req.payload.findByID({
+          collection: 'entitlements',
+          id: id,
+          depth: 0,
+        })
+        // Remove Checkin Logs before delete entitlement
+        for (const id of res.checkInLogs?.docs as number[]) {
+          await req.payload.delete({
+            collection: 'checkin-logs',
+            id: id,
+          })
+        }
+      },
+    ],
+  },
 }

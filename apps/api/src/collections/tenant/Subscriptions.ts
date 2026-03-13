@@ -9,6 +9,9 @@ export const Subscriptions: CollectionConfig = {
       type: 'relationship',
       relationTo: 'tenants',
       required: true,
+      admin: {
+        position: 'sidebar',
+      },
     },
 
     {

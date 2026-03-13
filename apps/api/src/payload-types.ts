@@ -101,9 +101,19 @@ export interface Config {
     customers: {
       entitlements: 'entitlements';
       orders: 'orders';
+      subscriptions: 'subscriptions';
+      checkInLogs: 'checkin-logs';
     };
     orders: {
       items: 'order-items';
+      seats: 'seat-reservations';
+      payments: 'payments';
+    };
+    'order-items': {
+      entitlements: 'entitlements';
+    };
+    entitlements: {
+      checkInLogs: 'checkin-logs';
     };
   };
   collectionsSelect: {
@@ -477,6 +487,16 @@ export interface Customer {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  subscriptions?: {
+    docs?: (number | Subscription)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  checkInLogs?: {
+    docs?: (number | CheckinLog)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -504,6 +524,11 @@ export interface Entitlement {
     | number
     | boolean
     | null;
+  checkInLogs?: {
+    docs?: (number | CheckinLog)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -528,6 +553,11 @@ export interface OrderItem {
     | number
     | boolean
     | null;
+  entitlements?: {
+    docs?: (number | Entitlement)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -556,36 +586,52 @@ export interface Order {
     | number
     | boolean
     | null;
+  seats?: {
+    docs?: (number | SeatReservation)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  payments?: {
+    docs?: (number | Payment)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "devices".
+ * via the `definition` "seat-reservations".
  */
-export interface Device {
-  id: number;
-  name: string;
-  deviceType: 'qr_scanner' | 'gate' | 'tablet';
-  apiKey: string;
-  lastSeen?: string | null;
-  status?: string | null;
-  user?: (number | null) | User;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "checkin-logs".
- */
-export interface CheckinLog {
+export interface SeatReservation {
   id: number;
   tentant: number | Tenant;
-  customer: number | Customer;
-  entitlement: number | Entitlement;
-  location?: string | null;
-  deviceId?: string | null;
-  status: 'success' | 'rejected';
+  seat: number | EventSeat;
+  order: number | Order;
+  status?: string | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "event-seats".
+ */
+export interface EventSeat {
+  id: number;
+  tentant: number | Tenant;
+  product: number | Product;
+  seatCode?: string | null;
+  section?: string | null;
+  status: 'available' | 'reserved' | 'sold';
   note?: string | null;
   meta?:
     | {
@@ -626,6 +672,31 @@ export interface Payment {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "checkin-logs".
+ */
+export interface CheckinLog {
+  id: number;
+  tentant: number | Tenant;
+  customer: number | Customer;
+  entitlement: number | Entitlement;
+  location?: string | null;
+  deviceId?: string | null;
+  status: 'success' | 'rejected';
+  note?: string | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "subscriptions".
  */
 export interface Subscription {
@@ -650,47 +721,16 @@ export interface Subscription {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "event-seats".
+ * via the `definition` "devices".
  */
-export interface EventSeat {
+export interface Device {
   id: number;
-  tentant: number | Tenant;
-  product: number | Product;
-  seatCode?: string | null;
-  section?: string | null;
-  status: 'available' | 'reserved' | 'sold';
-  note?: string | null;
-  meta?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "seat-reservations".
- */
-export interface SeatReservation {
-  id: number;
-  tentant: number | Tenant;
-  seat: number | EventSeat;
-  order: number | Order;
+  name: string;
+  deviceType: 'qr_scanner' | 'gate' | 'tablet';
+  apiKey: string;
+  lastSeen?: string | null;
   status?: string | null;
-  meta?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
+  user?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -945,6 +985,8 @@ export interface CustomersSelect<T extends boolean = true> {
   meta?: T;
   entitlements?: T;
   orders?: T;
+  subscriptions?: T;
+  checkInLogs?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1054,6 +1096,8 @@ export interface OrdersSelect<T extends boolean = true> {
   totalAmount?: T;
   status?: T;
   meta?: T;
+  seats?: T;
+  payments?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1069,6 +1113,7 @@ export interface OrderItemsSelect<T extends boolean = true> {
   quantity?: T;
   price?: T;
   meta?: T;
+  entitlements?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1087,6 +1132,7 @@ export interface EntitlementsSelect<T extends boolean = true> {
   status?: T;
   qrCode?: T;
   meta?: T;
+  checkInLogs?: T;
   updatedAt?: T;
   createdAt?: T;
 }

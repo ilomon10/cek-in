@@ -19,6 +19,8 @@ export const Payments: CollectionConfig = {
       options: [
         { label: 'Cash', value: 'cash' },
         { label: 'Transfer', value: 'transfer' },
+        { label: 'QRIS', value: 'qris' },
+        { label: 'Other', value: 'other' },
       ],
       required: true,
       defaultValue: 'cash',

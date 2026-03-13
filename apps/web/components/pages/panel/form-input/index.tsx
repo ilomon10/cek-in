@@ -211,7 +211,7 @@ export const FormInput = <
       render={(prop) => {
         return (
           <FormItem className={cn("max-w-lg", className)}>
-            {label && (
+            {type !== "checkbox" && label && (
               <FormLabel>
                 {label}
                 {helperText && (

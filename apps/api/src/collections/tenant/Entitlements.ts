@@ -4,7 +4,7 @@ export const Entitlements: CollectionConfig = {
   slug: 'entitlements',
   fields: [
     {
-      name: 'tentant',
+      name: 'tenant',
       type: 'relationship',
       relationTo: 'tenants',
       required: true,

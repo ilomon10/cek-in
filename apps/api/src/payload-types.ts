@@ -100,6 +100,7 @@ export interface Config {
     };
     customers: {
       entitlements: 'entitlements';
+      orders: 'orders';
     };
     orders: {
       items: 'order-items';
@@ -471,6 +472,11 @@ export interface Customer {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  orders?: {
+    docs?: (number | Order)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -480,7 +486,7 @@ export interface Customer {
  */
 export interface Entitlement {
   id: number;
-  tentant: number | Tenant;
+  tenant: number | Tenant;
   customer: number | Customer;
   product: number | Product;
   orderItem: number | OrderItem;
@@ -509,6 +515,8 @@ export interface OrderItem {
   id: number;
   order: number | Order;
   product: number | Product;
+  invoiceNumber?: string | null;
+  productName?: string | null;
   quantity?: number | null;
   price?: number | null;
   meta?:
@@ -598,7 +606,7 @@ export interface CheckinLog {
 export interface Payment {
   id: number;
   order: number | Order;
-  method: 'cash' | 'transfer';
+  method: 'cash' | 'transfer' | 'qris' | 'other';
   amount?: number | null;
   price?: number | null;
   status: 'paid' | 'waiting' | 'cancelled';
@@ -936,6 +944,7 @@ export interface CustomersSelect<T extends boolean = true> {
   avatarAsset?: T;
   meta?: T;
   entitlements?: T;
+  orders?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1055,6 +1064,8 @@ export interface OrdersSelect<T extends boolean = true> {
 export interface OrderItemsSelect<T extends boolean = true> {
   order?: T;
   product?: T;
+  invoiceNumber?: T;
+  productName?: T;
   quantity?: T;
   price?: T;
   meta?: T;
@@ -1066,7 +1077,7 @@ export interface OrderItemsSelect<T extends boolean = true> {
  * via the `definition` "entitlements_select".
  */
 export interface EntitlementsSelect<T extends boolean = true> {
-  tentant?: T;
+  tenant?: T;
   customer?: T;
   product?: T;
   orderItem?: T;

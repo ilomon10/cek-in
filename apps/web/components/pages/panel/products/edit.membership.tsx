@@ -259,7 +259,14 @@ export default function ProductEditMembershipForm() {
                       />
                     );
                   })}
-                  <Button variant={"secondary"} className="max-w-lg">
+                  <Button
+                    type="button"
+                    variant={"secondary"}
+                    className="max-w-lg"
+                    onClick={() =>
+                      featureFields.append({ title: "Type something." })
+                    }
+                  >
                     <PlusIcon /> Add Feature
                   </Button>
                 </FormItem>

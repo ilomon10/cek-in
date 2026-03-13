@@ -2,6 +2,9 @@ import type { CollectionConfig } from 'payload'
 
 export const OrderItems: CollectionConfig = {
   slug: 'order-items',
+  admin: {
+    useAsTitle: 'productName',
+  },
   fields: [
     {
       name: 'order',
@@ -15,6 +18,23 @@ export const OrderItems: CollectionConfig = {
       type: 'relationship',
       relationTo: 'products',
       required: true,
+    },
+
+    {
+      name: 'invoiceNumber',
+      type: 'text',
+      virtual: 'order.invoiceNumber',
+      admin: {
+        readOnly: true,
+      },
+    },
+    {
+      name: 'productName',
+      type: 'text',
+      virtual: 'product.name',
+      admin: {
+        readOnly: true,
+      },
     },
     {
       name: 'quantity',

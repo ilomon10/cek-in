@@ -1,7 +1,12 @@
 import type { CollectionConfig } from 'payload'
+import dayjs from 'dayjs'
+import { numberToRoman } from '@/utils/number-to-roman'
 
 export const Orders: CollectionConfig = {
   slug: 'orders',
+  admin: {
+    useAsTitle: 'invoiceNumber',
+  },
   fields: [
     {
       name: 'tenant',
@@ -28,6 +33,20 @@ export const Orders: CollectionConfig = {
       type: 'text',
       required: true,
       minLength: 3,
+      hooks: {
+        beforeChange: [
+          async ({ req }) => {
+            const lastInvoice = await req.payload.find({
+              collection: 'orders',
+              limit: 1,
+            })
+            const currentDate = dayjs()
+            const invNo = `INV/${currentDate.format('YYYYMMDD')}/${numberToRoman(Number(currentDate.format('MM')))}/${lastInvoice.totalDocs + 1}`
+            console.log('beforeRead', invNo, lastInvoice)
+            return invNo
+          },
+        ],
+      },
     },
     {
       name: 'totalAmount',

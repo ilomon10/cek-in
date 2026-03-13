@@ -6,9 +6,10 @@ export const generateSimpleHash = (
 
   for (let i = 0; i < value.length; i++) {
     hash = (hash << 5) - hash + value.charCodeAt(i);
-    hash |= 0; // Constrain to 32-bit integer
+    hash |= 0; // keep 32-bit
   }
 
-  // If alphanumeric is requested, convert to unsigned and Base36
-  return isAlphanumeric ? (hash >>> 0).toString(36) : hash;
+  const unsignedHash = hash >>> 0; // convert to unsigned
+
+  return isAlphanumeric ? unsignedHash.toString(36) : unsignedHash;
 };

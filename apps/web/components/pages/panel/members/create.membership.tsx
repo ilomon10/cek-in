@@ -14,15 +14,35 @@ import slugify from "slugify";
 import { generateSimpleHash } from "@repo/ui/lib/generate-simple-hash";
 import { generateId } from "@repo/ui/lib/generate-id";
 import { Separator } from "@repo/ui/components/ui/separator";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import dayjs from "dayjs";
 import {
+  Customer,
   MembershipConfig,
   Product,
 } from "@/components/providers/payload-types";
 import { Button } from "@repo/ui/components/ui/button";
-import { AspectRatio } from "@repo/ui/components/ui/aspect-ratio";
 import { toCurrency } from "@/components/utils/toCurrency";
+import { MemberCreatePayment } from "./create.payment";
+import {
+  Item,
+  ItemHeader,
+  ItemTitle,
+  ItemContent,
+} from "@repo/ui/components/ui/item";
+import { cn } from "@repo/ui/lib/utils";
+import { dataProvider } from "@/components/providers/data-provider";
+
+const paymentSchema = z.discriminatedUnion("paid", [
+  z.object({
+    paid: z.literal(true),
+    method: z.string(),
+  }),
+  z.object({
+    paid: z.literal(false),
+    method: z.string().optional(),
+  }),
+]);
 
 export const memberSchema = z.object({
   name: z.string().min(3),
@@ -31,8 +51,7 @@ export const memberSchema = z.object({
   startDate: z.string(),
   endDate: z.string(),
 
-  paid: z.coerce.boolean(),
-  payment: z.string(),
+  payment: paymentSchema,
 });
 
 type MemberFormData = z.infer<typeof memberSchema>;
@@ -52,23 +71,31 @@ export default function MemberCreateMembershipForm({
   const {
     mutate,
     mutation: { isPending },
-  } = useCreate<MemberFormData>({ resource: "products" });
+  } = useCreate<MemberFormData>({ resource: "customers" });
 
   const form = useForm<MemberFormInputData, any, MemberFormOutputData>({
     resolver: zodResolver(memberSchema),
     defaultValues: {
       name: isDev ? faker.person.firstName() : "",
-      phone: isDev ? faker.phone.number() : "",
+      phone: isDev
+        ? faker.phone.number({
+            style: "international",
+          })
+        : "",
       email: isDev
         ? `${slugify(faker.person.firstName(), { lower: true })}@example.com`
         : "",
       startDate: dayjs().format("DD/MM/YYYY"),
       endDate: undefined,
+
+      payment: {
+        paid: false,
+      },
     },
   });
 
-  const handleSubmit = (values: MemberFormOutputData) => {
-    const memberId = `CI${generateSimpleHash(generateId(), true)}`;
+  const handleSubmit = async (values: MemberFormOutputData) => {
+    const memberId = `CI${generateSimpleHash(generateId())}`;
 
     const result = {
       name: values.name,
@@ -79,21 +106,61 @@ export default function MemberCreateMembershipForm({
     };
 
     console.log(values);
-
-    // mutate(
-    //   { values: result },
-    //   {
-    //     onSettled(data) {
-    //       if (data?.data) {
-    //         const { id } = data.data as any;
-    //         router.replace(`/orgs/${tenantId}/products/edit/${id}`);
-    //       }
-    //     },
-    //   },
-    // );
+    mutate(
+      { values: result },
+      {
+        async onSettled(data) {
+          if (data?.data) {
+            const customer = data.data as unknown as Customer;
+            console.log("customer", customer);
+            const reqOrder = await dataProvider().create({
+              resource: "orders",
+              variables: {
+                tenant: tenant.id,
+                customer: customer.id,
+                status: values.payment.paid ? "paid" : "pending",
+              },
+            });
+            const reqOrderItem = await dataProvider().create({
+              resource: "order-items",
+              variables: {
+                tenant: tenant.id,
+                order: reqOrder.data.id,
+                product: product.id,
+                quantity: 1,
+                price: product.price,
+              },
+            });
+            if (values.payment.paid) {
+              const reqEntitlement = await dataProvider().create({
+                resource: "entitlements",
+                variables: {
+                  tenant: tenant.id,
+                  customer: customer.id,
+                  product: product.id,
+                  orderItem: reqOrderItem.data.id,
+                  startAt: dayjs(values.startDate, "DD/MM/YYYY").toISOString(),
+                  endAt: dayjs(values.endDate, "DD/MM/YYYY").toISOString(),
+                  status: "active",
+                },
+              });
+              console.log("entitlement", reqEntitlement);
+            }
+            console.log("order", reqOrder);
+            console.log("orderItem", reqOrderItem);
+            router.replace(`/orgs/${tenantId}/members/edit/${customer.id}`);
+          }
+        },
+      },
+    );
   };
 
   const startDate = form.watch("startDate");
+  const endDate = form.watch("endDate");
+  const paymentPaid = form.watch("payment.paid");
+  const paymentMethod = form.watch("payment.method");
+
+  const isSummary = startDate;
 
   useEffect(() => {
     if (!startDate) return;
@@ -111,6 +178,40 @@ export default function MemberCreateMembershipForm({
       );
     }
   }, [product, startDate]);
+
+  const SUMMARY_VALUES = useMemo(() => {
+    const color = paymentPaid ? "text-green-500" : "text-yellow-500";
+
+    const result = [
+      { label: "Product", value: product.name },
+      { label: "Duration", value: `${product.config?.duration_days} days` },
+      { label: "Applies Until", value: endDate },
+      {
+        label: "Payment Status",
+        value: (
+          <span className={color}>{paymentPaid ? "Paid" : "Waiting"}</span>
+        ),
+      },
+    ];
+
+    if (paymentPaid) {
+      result.push({
+        label: "Method",
+        value: paymentMethod?.toUpperCase() || "-",
+      });
+    }
+
+    result.push({
+      label: "Price",
+      value: (
+        <span className={cn(color, "text-lg")}>
+          {toCurrency(product.price)}
+        </span>
+      ),
+    });
+
+    return result;
+  }, [startDate, endDate, paymentPaid, paymentMethod]);
 
   return (
     <LoadingOverlay loading={isPending}>
@@ -158,7 +259,7 @@ export default function MemberCreateMembershipForm({
             />
           </div>
 
-          <Separator />
+          <Separator className="max-w-xl" />
 
           <div className="max-w-lg">
             <Button
@@ -204,23 +305,38 @@ export default function MemberCreateMembershipForm({
             />
           </div>
 
-          <FormInput
-            control={form.control}
-            type="selector"
-            name="paid"
-            listClassName="grid-cols-2"
-            options={[
-              { label: "Paid", value: "true" },
-              { label: "Not yet paid", value: "false" },
-            ]}
-          />
+          <Separator className="max-w-xl" />
+
+          <MemberCreatePayment />
+
+          {isSummary && (
+            <Item
+              variant={"outline"}
+              className={cn(
+                "max-w-lg",
+                paymentPaid ? "border-green-500" : "border-yellow-500",
+              )}
+            >
+              <ItemHeader>
+                <ItemTitle className="font-bold">Summary</ItemTitle>
+              </ItemHeader>
+              <ItemContent className="gap-2">
+                {SUMMARY_VALUES.map(({ label, value }, index) => (
+                  <div key={index} className="flex justify-between">
+                    <div className="text-muted-foreground">{label}</div>
+                    <div className="font-semibold">{value}</div>
+                  </div>
+                ))}
+              </ItemContent>
+            </Item>
+          )}
 
           <div className="flex space-x-2 mt-4 mb-[25vh]">
             <Button type="button" variant="outline">
               Cancel
             </Button>
             <Button type="submit" disabled={isPending}>
-              {isPending ? "Creating..." : "Create Product"}
+              {isPending ? "Creating..." : "Create Member"}
             </Button>
           </div>
         </form>

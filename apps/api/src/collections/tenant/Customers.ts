@@ -65,5 +65,15 @@ export const Customers: CollectionConfig = {
       collection: 'entitlements',
       on: 'customer',
     },
+
+    {
+      name: 'orders',
+      type: 'join',
+      collection: 'orders',
+      on: 'customer',
+      admin: {
+        defaultColumns: ['invoiceNumber', 'status', 'items', 'totalAmount'],
+      },
+    },
   ],
 }

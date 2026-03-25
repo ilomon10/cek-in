@@ -76,11 +76,11 @@ export default function MemberList() {
         ),
       },
       {
-        id: "role",
-        accessorKey: "role",
+        id: "plan",
+        accessorKey: "plan",
         header: ({ column, table }) => (
           <div className="flex items-center gap-1">
-            <span>Role</span>
+            <span>Plan</span>
             <div>
               <DataTableFilterDropdownText
                 defaultOperator="contains"

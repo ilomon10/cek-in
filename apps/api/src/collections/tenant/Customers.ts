@@ -107,6 +107,7 @@ export const Customers: CollectionConfig = {
           id: id,
           depth: 0,
         })
+
         // Remove `Orders` before delete Customer
         for (const id of res.orders?.docs as number[]) {
           await req.payload.delete({
@@ -115,12 +116,16 @@ export const Customers: CollectionConfig = {
           })
         }
 
-        // Remove `Orders` before delete Customer
-        for (const id of res.entitlements?.docs as number[]) {
-          await req.payload.delete({
-            collection: 'entitlements',
-            id: id,
-          })
+        // Remove `Entitlements` before delete Customer
+        try {
+          for (const id of res.entitlements?.docs as number[]) {
+            await req.payload.delete({
+              collection: 'entitlements',
+              id: id,
+            })
+          }
+        } catch (err) {
+          // no-op
         }
 
         // Remove `Subscriptions` before delete Customer

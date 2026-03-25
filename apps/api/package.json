@@ -27,6 +27,7 @@
     "dayjs": "^1.11.19",
     "dotenv": "17.3.1",
     "graphql": "^16.13.1",
+    "jose": "^6.2.2",
     "next": "16.2.0-canary.54",
     "payload": "3.79.0",
     "payload-oapi": "^0.2.5",

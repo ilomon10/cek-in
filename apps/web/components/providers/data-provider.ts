@@ -5,6 +5,7 @@ import { clientSDK } from "./client-sdk";
 import { convertRefineSortToPayload } from "./query-converter/sort";
 import { convertRefineFilterToPayload } from "./query-converter/filter";
 import { SERVER_URL } from "../constants";
+import { PopulateType } from "payload";
 // import { useLocalStorage } from "../hooks/use-local-storage";
 
 export const dataProvider = (): DataProvider => {
@@ -64,6 +65,7 @@ export const dataProvider = (): DataProvider => {
     getOne: async (props) => {
       const resource = props.resource as any;
       const select = props.meta?.select as { [k: string]: boolean };
+      const populate = props.meta?.populate as PopulateType;
       const depth = props.meta?.depth as number;
       const result: any = {
         data: null,
@@ -77,6 +79,7 @@ export const dataProvider = (): DataProvider => {
                 equals: props.meta?.slug,
               },
             },
+            populate: populate as any,
             select: select as any,
             depth,
           },
@@ -88,6 +91,7 @@ export const dataProvider = (): DataProvider => {
           {
             collection: resource,
             id: props.id,
+            populate: populate as any,
             select: select as any,
             depth,
           },
@@ -100,6 +104,7 @@ export const dataProvider = (): DataProvider => {
     },
     getList: async (props) => {
       const resource = props.resource as any;
+      const populate = props.meta?.populate as PopulateType;
       const select = props.meta?.select as { [k: string]: boolean };
       const depth = props.meta?.depth as number;
       const res = await client.find(
@@ -107,6 +112,7 @@ export const dataProvider = (): DataProvider => {
           collection: resource,
           sort: convertRefineSortToPayload(props.sorters),
           where: convertRefineFilterToPayload(props.filters),
+          populate: populate as any,
           select: select as any,
           depth,
         },

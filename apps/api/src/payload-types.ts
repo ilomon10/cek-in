@@ -524,6 +524,7 @@ export interface Entitlement {
     | number
     | boolean
     | null;
+  productType?: string | null;
   checkInLogs?: {
     docs?: (number | CheckinLog)[];
     hasNextPage?: boolean;
@@ -1132,6 +1133,7 @@ export interface EntitlementsSelect<T extends boolean = true> {
   status?: T;
   qrCode?: T;
   meta?: T;
+  productType?: T;
   checkInLogs?: T;
   updatedAt?: T;
   createdAt?: T;

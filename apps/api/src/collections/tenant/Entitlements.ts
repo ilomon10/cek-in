@@ -1,4 +1,6 @@
+import dayjs from 'dayjs'
 import type { CollectionConfig } from 'payload'
+import { UnsecuredJWT } from 'jose'
 
 export const Entitlements: CollectionConfig = {
   slug: 'entitlements',
@@ -62,11 +64,58 @@ export const Entitlements: CollectionConfig = {
     {
       name: 'qrCode',
       type: 'text',
+      hooks: {
+        beforeChange: [
+          async function ({ req, siblingData }) {
+            const product = await req.payload.findByID({
+              collection: 'products',
+              id: siblingData.product,
+              select: {
+                productType: true,
+              },
+            })
+
+            const customer = await req.payload.findByID({
+              collection: 'customers',
+              id: siblingData.customer,
+              select: {
+                name: true,
+                memberId: true,
+              },
+            })
+            const data = {
+              member: {
+                id: customer.memberId,
+                name: customer.name,
+              },
+              product: {
+                type: product.productType,
+              },
+              exp: dayjs(siblingData.endAt).unix(),
+            }
+            const jwt = new UnsecuredJWT(data).encode()
+            const jwtDecoded = UnsecuredJWT.decode(jwt)
+
+            console.log('QRCode CREATED', jwt)
+            console.log('QRCode DECODED', jwtDecoded)
+            return jwt
+          },
+        ],
+      },
     },
 
     {
       name: 'meta',
       type: 'json',
+    },
+
+    {
+      name: 'productType',
+      type: 'text',
+      virtual: 'product.productType',
+      admin: {
+        readOnly: true,
+      },
     },
 
     {
@@ -80,11 +129,14 @@ export const Entitlements: CollectionConfig = {
   hooks: {
     beforeDelete: [
       async ({ id, req, context }) => {
+        // console.log('DELETING ENTITLEMENT')
         const res = await req.payload.findByID({
           collection: 'entitlements',
           id: id,
           depth: 0,
         })
+
+        // console.log('Remove checkin-logs')
         // Remove Checkin Logs before delete entitlement
         for (const id of res.checkInLogs?.docs as number[]) {
           await req.payload.delete({

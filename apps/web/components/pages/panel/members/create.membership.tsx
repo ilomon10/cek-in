@@ -131,8 +131,18 @@ export default function MemberCreateMembershipForm({
                 price: product.price,
               },
             });
+
+            await dataProvider().create({
+              resource: "payments",
+              variables: {
+                order: reqOrder.data.id,
+                method: values.payment.method,
+                status: values.payment.paid ? "paid" : "waiting",
+              },
+            });
+
             if (values.payment.paid) {
-              const reqEntitlement = await dataProvider().create({
+              await dataProvider().create({
                 resource: "entitlements",
                 variables: {
                   tenant: tenant.id,
@@ -144,10 +154,7 @@ export default function MemberCreateMembershipForm({
                   status: "active",
                 },
               });
-              console.log("entitlement", reqEntitlement);
             }
-            console.log("order", reqOrder);
-            console.log("orderItem", reqOrderItem);
             router.replace(`/orgs/${tenantId}/members/edit/${customer.id}`);
           }
         },

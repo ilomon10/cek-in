@@ -20,6 +20,8 @@ import { FormInput } from "../form-input";
 import { Button } from "@repo/ui/components/ui/button";
 import { Separator } from "@repo/ui/components/ui/separator";
 import MemberEditProductsForm from "./edit.products";
+import { Label } from "@repo/ui/components/ui/label";
+import MemberEditProductsOrdersForm from "./edit.products.orders";
 
 export const memberSchema = z.object({
   id: z.number(),
@@ -34,7 +36,7 @@ type MemberFormOutputData = z.output<typeof memberSchema>;
 
 export default function MemberEditForm() {
   const tenant = useWithTenant();
-  const { tenantId, id } = useParams();
+  const { id } = useParams();
   // const router = useRouter();
 
   const {
@@ -80,7 +82,7 @@ export default function MemberEditForm() {
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="pl-12 px-4 flex flex-col gap-5"
+            className="pl-12 px-4 flex flex-col gap-5 mb-[25vh]"
           >
             {isDev && JSON.stringify(form.formState.errors)}
 
@@ -121,11 +123,7 @@ export default function MemberEditForm() {
               />
             </div>
 
-            <Separator />
-
-            <MemberEditProductsForm />
-
-            <div className="flex space-x-2 mt-4 mb-[25vh]">
+            <div className="flex space-x-2 mt-4">
               <Button type="button" variant="outline">
                 Cancel
               </Button>
@@ -133,6 +131,10 @@ export default function MemberEditForm() {
                 {isPending ? "Submitting..." : "Submit Change"}
               </Button>
             </div>
+
+            <Separator />
+            <MemberEditProductsForm />
+            <MemberEditProductsOrdersForm />
           </form>
         </Form>
       </LoadingOverlay>

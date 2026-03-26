@@ -17,6 +17,7 @@ import { useList } from "@refinedev/core";
 import {
   Customer,
   Entitlement,
+  Order,
   Product,
 } from "@/components/providers/payload-types";
 import { ContainerIcon, CrownIcon, TicketIcon } from "lucide-react";
@@ -26,84 +27,84 @@ import { AspectRatio } from "@repo/ui/components/ui/aspect-ratio";
 import { QRCode } from "@repo/ui/components/ui/shadcn-io/qr-code";
 import { Label } from "@repo/ui/components/ui/label";
 
-export default function MemberEditProductsForm() {
+export default function MemberEditProductsOrdersForm() {
   const form = useFormContext();
   const memberId = form.watch("id");
 
   const {
     query: { isFetching },
-    result: products,
-  } = useList<Entitlement>({
-    resource: "entitlements",
-    filters: [
-      {
-        field: "customer",
-        operator: "eq",
-        value: memberId,
-      },
-      {
-        field: "status",
-        operator: "eq",
-        value: "active",
-      },
-    ],
-    meta: {
-      populate: {
-        orderItem: {
-          price: true,
-          invoiceNumber: true,
-        },
-      },
-      select: {
-        // customer: false,
-        tenant: false,
-      },
-    },
+    result: orders,
+  } = useList<Order>({
+    resource: "orders",
+    // filters: [
+    //   {
+    //     field: "customer",
+    //     operator: "eq",
+    //     value: memberId,
+    //   },
+    //   {
+    //     field: "status",
+    //     operator: "eq",
+    //     value: "active",
+    //   },
+    // ],
+    // meta: {
+    //   populate: {
+    //     orderItem: {
+    //       price: true,
+    //       invoiceNumber: true,
+    //     },
+    //   },
+    //   select: {
+    //     // customer: false,
+    //     tenant: false,
+    //   },
+    // },
   });
 
   if (isUndef(memberId)) {
     return null;
   }
 
+  console.log(orders);
+
   return (
     <div className="flex flex-col gap-4">
-      <Label>Current Holding</Label>
+      <Label>Invoice</Label>
       <ItemGroup className="grid grid-cols-2 max-w-lg light">
         {isFetching && (
-          <ProductItem
+          <OrderItem
             skeleton={true}
-            entitlement={{
-              qrCode: "",
-              customer: {} as any,
-              product: {} as any,
-              startAt: "",
-              endAt: "",
-            }}
+            order={
+              {
+                // qrCode: "",
+                // customer: {} as any,
+                // product: {} as any,
+                // startAt: "",
+                // endAt: "",
+              }
+            }
           />
         )}
         {!isFetching &&
-          products.data.map((entitlement) => {
-            const key = entitlement.id;
-            return <ProductItem key={key} entitlement={entitlement} />;
+          orders.data.map((order) => {
+            const key = order.id;
+            return <OrderItem key={key} order={order} />;
           })}
       </ItemGroup>
     </div>
   );
 }
 
-const ProductItem = ({
+const OrderItem = ({
   skeleton = false,
-  entitlement,
+  order,
 }: {
   skeleton?: boolean;
-  entitlement: Pick<
-    Entitlement,
-    "qrCode" | "customer" | "product" | "startAt" | "endAt"
-  >;
+  order: Order;
 }) => {
-  const qrcode = entitlement.qrCode as string;
-  const customer = entitlement.customer as Customer;
-  const product = entitlement.product as Product;
+  // const qrcode = order.qrCode as string;
+  const product = order.product as Product;
   // const params = useParams<{ tenantId: string }>();
   // const orderItem = entitlement.orderItem as OrderItem;
 
@@ -162,7 +163,7 @@ const ProductItem = ({
             <Skeleton className="inline-block w-10 h-6" />
           ) : (
             <span className="text-lg">
-              {dayjs(entitlement.startAt).format("MM/YY")}
+              {dayjs(order.startAt).format("MM/YY")}
             </span>
           )}
         </div>
@@ -175,7 +176,7 @@ const ProductItem = ({
             <Skeleton className="inline-block w-10 h-6" />
           ) : (
             <span className="text-lg">
-              {dayjs(entitlement.endAt).format("MM/YY")}
+              {dayjs(order.endAt).format("MM/YY")}
             </span>
           )}
         </div>

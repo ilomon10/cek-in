@@ -23,6 +23,7 @@ export const TenantCreateHandler: PayloadHandler = async (req) => {
       data: {
         name: data.name,
         plan: data.plan as number,
+        status: 'active',
       },
     })
 

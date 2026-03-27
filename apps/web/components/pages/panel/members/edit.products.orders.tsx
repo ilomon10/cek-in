@@ -18,14 +18,22 @@ import {
   Customer,
   Entitlement,
   Order,
+  OrderItem as OrderItemType,
   Product,
 } from "@/components/providers/payload-types";
-import { ContainerIcon, CrownIcon, TicketIcon } from "lucide-react";
+import {
+  ContainerIcon,
+  CrownIcon,
+  ReceiptIcon,
+  TicketIcon,
+} from "lucide-react";
 import { Separator } from "@repo/ui/components/ui/separator";
 import { Skeleton } from "@repo/ui/components/ui/skeleton";
 import { AspectRatio } from "@repo/ui/components/ui/aspect-ratio";
 import { QRCode } from "@repo/ui/components/ui/shadcn-io/qr-code";
 import { Label } from "@repo/ui/components/ui/label";
+import { Badge } from "@repo/ui/components/ui/badge";
+import { cn } from "@repo/ui/lib/utils";
 
 export default function MemberEditProductsOrdersForm() {
   const form = useFormContext();
@@ -36,37 +44,28 @@ export default function MemberEditProductsOrdersForm() {
     result: orders,
   } = useList<Order>({
     resource: "orders",
-    // filters: [
-    //   {
-    //     field: "customer",
-    //     operator: "eq",
-    //     value: memberId,
-    //   },
-    //   {
-    //     field: "status",
-    //     operator: "eq",
-    //     value: "active",
-    //   },
-    // ],
-    // meta: {
-    //   populate: {
-    //     orderItem: {
-    //       price: true,
-    //       invoiceNumber: true,
-    //     },
-    //   },
-    //   select: {
-    //     // customer: false,
-    //     tenant: false,
-    //   },
-    // },
+    filters: [
+      {
+        field: "customer",
+        operator: "eq",
+        value: memberId,
+      },
+    ],
+    meta: {
+      select: {
+        customer: false,
+        tenant: false,
+      },
+    },
   });
 
   if (isUndef(memberId)) {
     return null;
   }
 
-  console.log(orders);
+  if (orders.data.length === 0) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -75,15 +74,12 @@ export default function MemberEditProductsOrdersForm() {
         {isFetching && (
           <OrderItem
             skeleton={true}
-            order={
-              {
-                // qrCode: "",
-                // customer: {} as any,
-                // product: {} as any,
-                // startAt: "",
-                // endAt: "",
-              }
-            }
+            order={{
+              items: [{ product: { productType: "" } }] as any,
+              createdAt: "",
+              status: "paid",
+              invoiceNumber: "",
+            }}
           />
         )}
         {!isFetching &&
@@ -101,19 +97,10 @@ const OrderItem = ({
   order,
 }: {
   skeleton?: boolean;
-  order: Order;
+  order: Pick<Order, "invoiceNumber" | "items" | "createdAt" | "status">;
 }) => {
-  // const qrcode = order.qrCode as string;
-  const product = order.product as Product;
-  // const params = useParams<{ tenantId: string }>();
-  // const orderItem = entitlement.orderItem as OrderItem;
-
-  // const imageUrl = useAsyncMemo(async () => {
-  //   return `/orgs/${params.tenantId}/members/qrcode/${qrcode}`;
-  // return (await new Promise((resolve, reject) => {
-  //   QRCode.toDataURL(qrcode).then(resolve).catch(reject);
-  // })) as string;
-  // }, [qrcode]);
+  const items = order.items?.docs as OrderItemType[];
+  const product = items?.[0]?.product as Product;
 
   return (
     <Item
@@ -121,15 +108,12 @@ const OrderItem = ({
       className="bg-background text-foreground select-none"
     >
       <ItemHeader>
-        <ItemMedia variant={"image"} className="size-full">
-          {skeleton ? (
-            <AspectRatio>
-              <Skeleton className="size-full" />
-            </AspectRatio>
-          ) : (
-            <QRCode data={qrcode} />
-          )}
-        </ItemMedia>
+        <div className="text-muted-foreground">
+          {dayjs(order.createdAt).format("MMM D, YYYY")}
+        </div>
+        <Badge variant={"outline"} className={cn("capitalize")}>
+          {order.status}
+        </Badge>
       </ItemHeader>
       <ItemMedia variant={"image"} className={skeleton ? "" : "bg-muted"}>
         {skeleton ? (
@@ -146,7 +130,7 @@ const OrderItem = ({
       </ItemMedia>
       <ItemContent>
         <ItemTitle>
-          {skeleton ? <Skeleton className="w-30 h-3" /> : customer.name}
+          {skeleton ? <Skeleton className="w-30 h-3" /> : product.name}
         </ItemTitle>
         {skeleton ? (
           <Skeleton className="w-20 h-3" />
@@ -157,27 +141,12 @@ const OrderItem = ({
         )}
       </ItemContent>
       <ItemFooter>
-        <div className="text-muted-foreground">
-          <span className="text-xs">Since: </span>
+        <div className="flex gap-1 items-center text-md text-muted-foreground">
+          {/* <ReceiptIcon className="size-5" /> */}
           {skeleton ? (
             <Skeleton className="inline-block w-10 h-6" />
           ) : (
-            <span className="text-lg">
-              {dayjs(order.startAt).format("MM/YY")}
-            </span>
-          )}
-        </div>
-        <div className="h-6">
-          <Separator orientation="vertical" />
-        </div>
-        <div className="text-muted-foreground">
-          <span className="text-xs">Until: </span>
-          {skeleton ? (
-            <Skeleton className="inline-block w-10 h-6" />
-          ) : (
-            <span className="text-lg">
-              {dayjs(order.endAt).format("MM/YY")}
-            </span>
+            <span>{order.invoiceNumber}</span>
           )}
         </div>
       </ItemFooter>

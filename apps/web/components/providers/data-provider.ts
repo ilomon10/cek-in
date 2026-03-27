@@ -5,7 +5,7 @@ import { clientSDK } from "./client-sdk";
 import { convertRefineSortToPayload } from "./query-converter/sort";
 import { convertRefineFilterToPayload } from "./query-converter/filter";
 import { SERVER_URL } from "../constants";
-import { PopulateType } from "payload";
+import { JoinQuery, PopulateType } from "payload";
 // import { useLocalStorage } from "../hooks/use-local-storage";
 
 export const dataProvider = (): DataProvider => {
@@ -105,6 +105,7 @@ export const dataProvider = (): DataProvider => {
     getList: async (props) => {
       const resource = props.resource as any;
       const populate = props.meta?.populate as PopulateType;
+      const joins = props.meta?.joins as JoinQuery;
       const select = props.meta?.select as { [k: string]: boolean };
       const depth = props.meta?.depth as number;
       const res = await client.find(
@@ -113,6 +114,7 @@ export const dataProvider = (): DataProvider => {
           sort: convertRefineSortToPayload(props.sorters),
           where: convertRefineFilterToPayload(props.filters),
           populate: populate as any,
+          joins: joins,
           select: select as any,
           depth,
         },

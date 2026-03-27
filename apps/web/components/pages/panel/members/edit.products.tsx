@@ -65,6 +65,10 @@ export default function MemberEditProductsForm() {
     return null;
   }
 
+  if (products.data.length === 0) {
+    return null;
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <Label>Current Holding</Label>

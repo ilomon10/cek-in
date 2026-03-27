@@ -29,6 +29,7 @@ export const Orders: CollectionConfig = {
       type: 'join',
       collection: 'order-items',
       on: 'order',
+      maxDepth: 2,
     },
 
     {

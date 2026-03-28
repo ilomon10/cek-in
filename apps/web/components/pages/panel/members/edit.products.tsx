@@ -25,11 +25,10 @@ import { Skeleton } from "@repo/ui/components/ui/skeleton";
 import { AspectRatio } from "@repo/ui/components/ui/aspect-ratio";
 import { QRCode } from "@repo/ui/components/ui/shadcn-io/qr-code";
 import { Label } from "@repo/ui/components/ui/label";
+import { useParams } from "next/navigation";
 
 export default function MemberEditProductsForm() {
-  const form = useFormContext();
-  const memberId = form.watch("id");
-
+  const { id: memberId } = useParams<{ id: string }>();
   const {
     query: { isFetching },
     result: products,
@@ -49,14 +48,19 @@ export default function MemberEditProductsForm() {
     ],
     meta: {
       populate: {
-        orderItem: {
-          price: true,
-          invoiceNumber: true,
+        products: {
+          productType: true,
+        },
+        customers: {
+          name: true,
         },
       },
       select: {
-        // customer: false,
-        tenant: false,
+        qrCode: true,
+        customer: true,
+        product: true,
+        startAt: true,
+        endAt: true,
       },
     },
   });
@@ -65,12 +69,12 @@ export default function MemberEditProductsForm() {
     return null;
   }
 
-  if (products.data.length === 0) {
+  if (!isFetching && products.data.length === 0) {
     return null;
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 pl-12">
       <Label>Current Holding</Label>
       <ItemGroup className="grid grid-cols-2 max-w-lg light">
         {isFetching && (

@@ -63,6 +63,8 @@ export default function MemberEditForm() {
     },
   });
 
+  const memberId = form.watch("id");
+
   const handleSubmit = (values: MemberFormInputData) => {
     console.log(values);
     const result = {
@@ -82,7 +84,7 @@ export default function MemberEditForm() {
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="pl-12 px-4 flex flex-col gap-5 mb-[25vh]"
+            className="pl-12 px-4 flex flex-col gap-5 mb-4"
           >
             {isDev && JSON.stringify(form.formState.errors)}
 
@@ -131,13 +133,13 @@ export default function MemberEditForm() {
                 {isPending ? "Submitting..." : "Submit Change"}
               </Button>
             </div>
-
-            <Separator />
-            <MemberEditProductsForm />
-            <MemberEditProductsOrdersForm />
           </form>
         </Form>
       </LoadingOverlay>
+
+      <Separator />
+      <MemberEditProductsForm />
+      <MemberEditProductsOrdersForm />
     </EditView>
   );
 }

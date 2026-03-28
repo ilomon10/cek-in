@@ -1,6 +1,7 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, PaginatedDocs } from 'payload'
 import dayjs from 'dayjs'
 import { numberToRoman } from '@/utils/number-to-roman'
+import { OrderItem } from '@/payload-types'
 
 export const Orders: CollectionConfig = {
   slug: 'orders',
@@ -39,7 +40,10 @@ export const Orders: CollectionConfig = {
       minLength: 3,
       hooks: {
         beforeChange: [
-          async ({ req }) => {
+          async ({ req, value }) => {
+            if (value) {
+              return value
+            }
             const lastInvoice = await req.payload.find({
               collection: 'orders',
               limit: 1,
@@ -54,6 +58,31 @@ export const Orders: CollectionConfig = {
     {
       name: 'totalAmount',
       type: 'number',
+      virtual: true,
+      admin: {
+        readOnly: true,
+      },
+      hooks: {
+        afterRead: [
+          async function ({ siblingData, req }) {
+            const doc = await req.payload.findByID({
+              collection: 'orders',
+              id: siblingData.id,
+              depth: 1,
+              select: { items: true },
+              populate: { 'order-items': { price: true } },
+            })
+            if (!doc) {
+              return 0
+            }
+            const items = doc.items as PaginatedDocs<OrderItem>
+            const result = items.docs.reduce((prev, curr) => {
+              return prev + (curr.price || 0)
+            }, 0)
+            return result
+          },
+        ],
+      },
     },
     {
       name: 'status',
@@ -73,16 +102,16 @@ export const Orders: CollectionConfig = {
     },
 
     {
-      name: 'seats',
+      name: 'payments',
       type: 'join',
-      collection: 'seat-reservations',
+      collection: 'payments',
       on: 'order',
     },
 
     {
-      name: 'payments',
+      name: 'seats',
       type: 'join',
-      collection: 'payments',
+      collection: 'seat-reservations',
       on: 'order',
     },
   ],

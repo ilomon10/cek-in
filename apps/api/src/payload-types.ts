@@ -106,8 +106,8 @@ export interface Config {
     };
     orders: {
       items: 'order-items';
-      seats: 'seat-reservations';
       payments: 'payments';
+      seats: 'seat-reservations';
     };
     'order-items': {
       entitlements: 'entitlements';
@@ -587,16 +587,40 @@ export interface Order {
     | number
     | boolean
     | null;
-  seats?: {
-    docs?: (number | SeatReservation)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
   payments?: {
     docs?: (number | Payment)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  seats?: {
+    docs?: (number | SeatReservation)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payments".
+ */
+export interface Payment {
+  id: number;
+  order: number | Order;
+  method: 'cash' | 'transfer' | 'qris' | 'other';
+  price?: number | null;
+  status: 'paid' | 'waiting' | 'cancelled';
+  paidAt?: string | null;
+  referenceNumber?: string | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -634,31 +658,6 @@ export interface EventSeat {
   section?: string | null;
   status: 'available' | 'reserved' | 'sold';
   note?: string | null;
-  meta?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payments".
- */
-export interface Payment {
-  id: number;
-  order: number | Order;
-  method: 'cash' | 'transfer' | 'qris' | 'other';
-  amount?: number | null;
-  price?: number | null;
-  status: 'paid' | 'waiting' | 'cancelled';
-  paidAt?: string | null;
-  referenceNumber?: string | null;
   meta?:
     | {
         [k: string]: unknown;
@@ -1097,8 +1096,8 @@ export interface OrdersSelect<T extends boolean = true> {
   totalAmount?: T;
   status?: T;
   meta?: T;
-  seats?: T;
   payments?: T;
+  seats?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1161,7 +1160,6 @@ export interface CheckinLogsSelect<T extends boolean = true> {
 export interface PaymentsSelect<T extends boolean = true> {
   order?: T;
   method?: T;
-  amount?: T;
   price?: T;
   status?: T;
   paidAt?: T;

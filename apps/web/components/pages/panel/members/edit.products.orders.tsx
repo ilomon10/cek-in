@@ -22,8 +22,10 @@ import {
   Product,
 } from "@/components/providers/payload-types";
 import {
+  CheckCircle2Icon,
   ContainerIcon,
   CrownIcon,
+  DollarSignIcon,
   ReceiptIcon,
   TicketIcon,
 } from "lucide-react";
@@ -34,11 +36,23 @@ import { QRCode } from "@repo/ui/components/ui/shadcn-io/qr-code";
 import { Label } from "@repo/ui/components/ui/label";
 import { Badge } from "@repo/ui/components/ui/badge";
 import { cn } from "@repo/ui/lib/utils";
+import { Button } from "@repo/ui/components/ui/button";
+import { useParams } from "next/navigation";
+import MemberEditProductOrderPaymentForm from "./edit.products.orders.payment";
+
+export type OrderResponse = Pick<
+  Order,
+  | "tenant"
+  | "customer"
+  | "invoiceNumber"
+  | "items"
+  | "updatedAt"
+  | "status"
+  | "totalAmount"
+>;
 
 export default function MemberEditProductsOrdersForm() {
-  const form = useFormContext();
-  const memberId = form.watch("id");
-
+  const { id: memberId } = useParams<{ id: string }>();
   const {
     query: { isFetching },
     result: orders,
@@ -52,9 +66,18 @@ export default function MemberEditProductsOrdersForm() {
       },
     ],
     meta: {
+      populate: {
+        tenant: { id: true },
+        customer: { id: true },
+      },
       select: {
-        customer: false,
-        tenant: false,
+        tenant: true,
+        customer: true,
+        items: true,
+        updatedAt: true,
+        status: true,
+        invoiceNumber: true,
+        totalAmount: true,
       },
     },
   });
@@ -63,23 +86,25 @@ export default function MemberEditProductsOrdersForm() {
     return null;
   }
 
-  if (orders.data.length === 0) {
+  if (!isFetching && orders.data.length === 0) {
     return null;
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <Label>Invoice</Label>
-      <ItemGroup className="grid grid-cols-2 max-w-lg light">
+    <div className="flex flex-col gap-4 pl-12">
+      <Label>Invoices</Label>
+      <ItemGroup className="max-w-lg light">
         {isFetching && (
           <OrderItem
             skeleton={true}
-            order={{
-              items: [{ product: { productType: "" } }] as any,
-              createdAt: "",
-              status: "paid",
-              invoiceNumber: "",
-            }}
+            order={
+              {
+                items: [{ product: { productType: "" } }] as any,
+                updatedAt: "",
+                status: "paid",
+                invoiceNumber: "",
+              } as any
+            }
           />
         )}
         {!isFetching &&
@@ -97,7 +122,7 @@ const OrderItem = ({
   order,
 }: {
   skeleton?: boolean;
-  order: Pick<Order, "invoiceNumber" | "items" | "createdAt" | "status">;
+  order: OrderResponse;
 }) => {
   const items = order.items?.docs as OrderItemType[];
   const product = items?.[0]?.product as Product;
@@ -109,9 +134,17 @@ const OrderItem = ({
     >
       <ItemHeader>
         <div className="text-muted-foreground">
-          {dayjs(order.createdAt).format("MMM D, YYYY")}
+          {dayjs(order.updatedAt).format("MMM D, YYYY")}
         </div>
-        <Badge variant={"outline"} className={cn("capitalize")}>
+
+        <Badge
+          variant={"outline"}
+          className={cn(
+            "capitalize",
+            order.status === "paid" && "text-green-600 border-green-600",
+            order.status === "pending" && "text-orange-500 border-orange-500",
+          )}
+        >
           {order.status}
         </Badge>
       </ItemHeader>
@@ -140,6 +173,11 @@ const OrderItem = ({
           </ItemDescription>
         )}
       </ItemContent>
+      {order.status === "pending" && (
+        <ItemContent>
+          <MemberEditProductOrderPaymentForm order={order} />
+        </ItemContent>
+      )}
       <ItemFooter>
         <div className="flex gap-1 items-center text-md text-muted-foreground">
           {/* <ReceiptIcon className="size-5" /> */}

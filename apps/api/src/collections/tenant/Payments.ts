@@ -27,13 +27,12 @@ export const Payments: CollectionConfig = {
     },
 
     {
-      name: 'amount',
-      type: 'number',
-    },
-
-    {
       name: 'price',
       type: 'number',
+      virtual: 'order.totalAmount',
+      admin: {
+        readOnly: true,
+      },
     },
 
     {

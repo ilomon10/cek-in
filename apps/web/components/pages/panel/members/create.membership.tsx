@@ -105,7 +105,6 @@ export default function MemberCreateMembershipForm({
       memberId,
     };
 
-    console.log(values);
     mutate(
       { values: result },
       {
@@ -132,15 +131,6 @@ export default function MemberCreateMembershipForm({
               },
             });
 
-            await dataProvider().create({
-              resource: "payments",
-              variables: {
-                order: reqOrder.data.id,
-                method: values.payment.method,
-                status: values.payment.paid ? "paid" : "waiting",
-              },
-            });
-
             if (values.payment.paid) {
               await dataProvider().create({
                 resource: "entitlements",
@@ -152,6 +142,25 @@ export default function MemberCreateMembershipForm({
                   startAt: dayjs(values.startDate, "DD/MM/YYYY").toISOString(),
                   endAt: dayjs(values.endDate, "DD/MM/YYYY").toISOString(),
                   status: "active",
+                },
+              });
+
+              await dataProvider().create({
+                resource: "payments",
+                variables: {
+                  order: reqOrder.data.id,
+                  method: values.payment.method,
+                  status: "paid",
+                  paidAt: new Date().toISOString(),
+                },
+              });
+            } else {
+              await dataProvider().create({
+                resource: "payments",
+                variables: {
+                  order: reqOrder.data.id,
+                  method: values.payment.method,
+                  status: "waiting",
                 },
               });
             }

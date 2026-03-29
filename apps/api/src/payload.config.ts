@@ -27,6 +27,7 @@ import { SeatReservations } from './collections/event-seat-management/SeatReserv
 import { Devices } from './collections/platform/Devices'
 import { Plans } from './collections/platform/Plans'
 import { TenantUsers } from './collections/platform/TenantUsers'
+import CreateMembershipHandler from './endpoints/create-membership'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -99,6 +100,7 @@ export default buildConfig({
     scalar({ enabled: isDev || !isTest }),
   ],
   cors: '*',
+  endpoints: [CreateMembershipHandler],
 })
 
 declare module 'payload' {

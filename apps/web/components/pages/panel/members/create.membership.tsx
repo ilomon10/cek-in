@@ -1,6 +1,11 @@
 "use client";
 import { LoadingOverlay } from "@/components/refine-ui/layout/loading-overlay";
-import { useCreate } from "@refinedev/core";
+import {
+  useCreate,
+  useCustom,
+  useCustomMutation,
+  type CustomResponse,
+} from "@refinedev/core";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@repo/ui/components/ui/form";
@@ -71,7 +76,7 @@ export default function MemberCreateMembershipForm({
   const {
     mutate,
     mutation: { isPending },
-  } = useCreate<MemberFormData>({ resource: "customers" });
+  } = useCustomMutation<MemberFormData>();
 
   const form = useForm<MemberFormInputData, any, MemberFormOutputData>({
     resolver: zodResolver(memberSchema),
@@ -95,77 +100,32 @@ export default function MemberCreateMembershipForm({
   });
 
   const handleSubmit = async (values: MemberFormOutputData) => {
-    const memberId = `CI${generateSimpleHash(generateId())}`;
-
     const result = {
       name: values.name,
       phone: values.phone,
       email: values.email,
       tenant: tenant.id,
-      memberId,
+      product: product.id,
     };
 
     mutate(
-      { values: result },
       {
-        async onSettled(data) {
-          if (data?.data) {
-            const customer = data.data as unknown as Customer;
-            console.log("customer", customer);
-            const reqOrder = await dataProvider().create({
-              resource: "orders",
-              variables: {
-                tenant: tenant.id,
-                customer: customer.id,
-                status: values.payment.paid ? "paid" : "pending",
-              },
-            });
-            const reqOrderItem = await dataProvider().create({
-              resource: "order-items",
-              variables: {
-                tenant: tenant.id,
-                order: reqOrder.data.id,
-                product: product.id,
-                quantity: 1,
-                price: product.price,
-              },
-            });
-
-            if (values.payment.paid) {
-              await dataProvider().create({
-                resource: "entitlements",
-                variables: {
-                  tenant: tenant.id,
-                  customer: customer.id,
-                  product: product.id,
-                  orderItem: reqOrderItem.data.id,
-                  startAt: dayjs(values.startDate, "DD/MM/YYYY").toISOString(),
-                  endAt: dayjs(values.endDate, "DD/MM/YYYY").toISOString(),
-                  status: "active",
-                },
-              });
-
-              await dataProvider().create({
-                resource: "payments",
-                variables: {
-                  order: reqOrder.data.id,
-                  method: values.payment.method,
-                  status: "paid",
-                  paidAt: new Date().toISOString(),
-                },
-              });
-            } else {
-              await dataProvider().create({
-                resource: "payments",
-                variables: {
-                  order: reqOrder.data.id,
-                  method: values.payment.method,
-                  status: "waiting",
-                },
-              });
-            }
-            router.replace(`/orgs/${tenantId}/members/edit/${customer.id}`);
-          }
+        method: "post",
+        url: "/membership/create",
+        values: result,
+      },
+      {
+        async onSettled(_data, error, variables, onMutateResult, context) {
+          const { data } = _data as CustomResponse;
+          const payment = await dataProvider().custom?.({
+            method: "post",
+            url: `/orders/${data.orderId}/pay`,
+            payload: {
+              method: values.payment.method,
+              paid: values.payment.paid,
+            },
+          });
+          console.log(data.orderId, payment);
         },
       },
     );

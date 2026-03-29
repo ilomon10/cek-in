@@ -575,7 +575,7 @@ export interface Order {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
-  invoiceNumber: string;
+  invoiceNumber?: string | null;
   totalAmount?: number | null;
   status?: ('pending' | 'paid' | 'cancelled' | 'refunded') | null;
   meta?:

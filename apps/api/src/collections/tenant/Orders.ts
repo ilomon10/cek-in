@@ -2,6 +2,7 @@ import type { CollectionConfig, PaginatedDocs } from 'payload'
 import dayjs from 'dayjs'
 import { numberToRoman } from '@/utils/number-to-roman'
 import { OrderItem } from '@/payload-types'
+import OrderPayHandler from '@/endpoints/order-pay'
 
 export const Orders: CollectionConfig = {
   slug: 'orders',
@@ -38,19 +39,27 @@ export const Orders: CollectionConfig = {
       type: 'text',
       required: true,
       minLength: 3,
+      admin: {
+        condition: () => true,
+        readOnly: true,
+      },
       hooks: {
-        beforeChange: [
-          async ({ req, value }) => {
-            if (value) {
-              return value
+        beforeValidate: [
+          async ({ req, value, operation }) => {
+            if (operation === 'create' && !value) {
+              const lastInvoice = await req.payload.find({
+                collection: 'orders',
+                limit: 1,
+                sort: '-createdAt',
+              })
+              const currentDate = dayjs()
+              const nextNumber = (lastInvoice.totalDocs || 0) + 1
+              const romanMonth = numberToRoman(Number(currentDate.format('MM')))
+
+              return `INV/${currentDate.format('YYYYMMDD')}/${romanMonth}/${nextNumber}`
             }
-            const lastInvoice = await req.payload.find({
-              collection: 'orders',
-              limit: 1,
-            })
-            const currentDate = dayjs()
-            const invNo = `INV/${currentDate.format('YYYYMMDD')}/${numberToRoman(Number(currentDate.format('MM')))}/${lastInvoice.totalDocs + 1}`
-            return invNo
+
+            return value
           },
         ],
       },
@@ -65,21 +74,25 @@ export const Orders: CollectionConfig = {
       hooks: {
         afterRead: [
           async function ({ siblingData, req }) {
-            const doc = await req.payload.findByID({
-              collection: 'orders',
-              id: siblingData.id,
-              depth: 1,
-              select: { items: true },
-              populate: { 'order-items': { price: true } },
-            })
-            if (!doc) {
+            try {
+              const doc = await req.payload.findByID({
+                collection: 'orders',
+                id: siblingData.id,
+                depth: 1,
+                select: { items: true },
+                populate: { 'order-items': { price: true } },
+              })
+              if (!doc) {
+                return 0
+              }
+              const items = doc.items as PaginatedDocs<OrderItem>
+              const result = items.docs.reduce((prev, curr) => {
+                return prev + (curr.price || 0)
+              }, 0)
+              return result
+            } catch (err) {
               return 0
             }
-            const items = doc.items as PaginatedDocs<OrderItem>
-            const result = items.docs.reduce((prev, curr) => {
-              return prev + (curr.price || 0)
-            }, 0)
-            return result
           },
         ],
       },
@@ -150,4 +163,5 @@ export const Orders: CollectionConfig = {
       },
     ],
   },
+  endpoints: [OrderPayHandler],
 }

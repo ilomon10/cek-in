@@ -145,6 +145,7 @@ export const dataProvider = (): DataProvider => {
           | "PATCH",
         path: params.url,
         json: params.payload,
+        init: config,
       });
       return {
         data: await req.json(),

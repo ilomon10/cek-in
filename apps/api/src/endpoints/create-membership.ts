@@ -1,5 +1,4 @@
-import { generateId } from '@/utils/generate-id'
-import { generateSimpleHash } from '@/utils/generate-simple-hash'
+import { createOrder } from '@/services/order.service/create-order'
 import { APIError, Endpoint } from 'payload'
 import z, { ZodError } from 'zod'
 
@@ -19,50 +18,28 @@ const CreateMembershipHandler: Omit<Endpoint, 'root'> = {
     const raw = await req.json?.()
     try {
       const data = schema.parse(raw)
-      const tenantId = data.tenant
 
-      const product = await req.payload.findByID({
-        collection: 'products',
-        id: data.product,
-      })
+      const {
+        entity: { order, customer },
+      } = await createOrder(req, {
+        name: data.name,
+        phone: data.phone,
+        email: data.email,
 
-      const customer = await req.payload.create({
-        collection: 'customers',
-        data: {
-          tenant: tenantId,
-          name: data.name,
-          phone: data.phone,
-          email: data.email,
-          memberId: `CI${generateSimpleHash(generateId())}`,
-        },
-      })
-
-      const order = await req.payload.create({
-        collection: 'orders',
-        data: {
-          tenant: tenantId,
-          customer: customer.id,
-          status: 'pending',
-        },
-      })
-
-      await req.payload.create({
-        collection: 'order-items',
-        data: {
-          order: order.id,
-          product: product.id,
-          quantity: 1,
-          price: product.price,
-        },
+        productId: data.product,
+        tenantId: data.tenant,
       })
 
       return Response.json({
         success: 'OK',
         message: 'Member was created',
-        orderId: order.id,
+        data: {
+          customerId: customer.id,
+          orderId: order.id,
+        },
       })
     } catch (err: unknown) {
-      console.log(err)
+      console.error(err)
       if (err instanceof ZodError) {
         throw new APIError('Bad Request.', 400, err.issues)
       } else if (err instanceof Error) {

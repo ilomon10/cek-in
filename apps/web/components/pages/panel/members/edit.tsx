@@ -1,17 +1,12 @@
 "use client";
-import { useState } from "react";
-import { Product } from "@/components/providers/payload-types";
 import {
   EditView,
   EditViewHeader,
 } from "@/components/refine-ui/views/edit-view";
 import z from "zod";
-import { faker } from "@faker-js/faker";
 import { isDev } from "@/components/hooks/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm as useFormDispatch } from "@refinedev/react-hook-form";
-import slugify from "slugify";
-import dayjs from "dayjs";
 import { useParams } from "next/navigation";
 import { useWithTenant } from "@/components/hooks/use-tenant";
 import { LoadingOverlay } from "@/components/refine-ui/layout/loading-overlay";
@@ -20,7 +15,6 @@ import { FormInput } from "../form-input";
 import { Button } from "@repo/ui/components/ui/button";
 import { Separator } from "@repo/ui/components/ui/separator";
 import MemberEditProductsForm from "./edit.products";
-import { Label } from "@repo/ui/components/ui/label";
 import MemberEditProductsOrdersForm from "./edit.products.orders";
 
 export const memberSchema = z.object({
@@ -140,6 +134,8 @@ export default function MemberEditForm() {
       <Separator />
       <MemberEditProductsForm />
       <MemberEditProductsOrdersForm />
+
+      <div className="h-[25vh]" />
     </EditView>
   );
 }

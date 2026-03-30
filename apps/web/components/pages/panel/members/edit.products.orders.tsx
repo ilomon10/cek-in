@@ -37,11 +37,12 @@ import { Label } from "@repo/ui/components/ui/label";
 import { Badge } from "@repo/ui/components/ui/badge";
 import { cn } from "@repo/ui/lib/utils";
 import { Button } from "@repo/ui/components/ui/button";
-import { useParams } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import MemberEditProductOrderPaymentForm from "./edit.products.orders.payment";
 
 export type OrderResponse = Pick<
   Order,
+  | "id"
   | "tenant"
   | "customer"
   | "invoiceNumber"
@@ -52,9 +53,11 @@ export type OrderResponse = Pick<
 >;
 
 export default function MemberEditProductsOrdersForm() {
+  const router = useRouter();
+  const pathname = usePathname();
   const { id: memberId } = useParams<{ id: string }>();
   const {
-    query: { isFetching },
+    query: { isFetching, refetch },
     result: orders,
   } = useList<Order>({
     resource: "orders",
@@ -110,7 +113,13 @@ export default function MemberEditProductsOrdersForm() {
         {!isFetching &&
           orders.data.map((order) => {
             const key = order.id;
-            return <OrderItem key={key} order={order} />;
+            return (
+              <OrderItem
+                key={key}
+                order={order}
+                onSubmitted={() => router.push(pathname)}
+              />
+            );
           })}
       </ItemGroup>
     </div>
@@ -120,9 +129,11 @@ export default function MemberEditProductsOrdersForm() {
 const OrderItem = ({
   skeleton = false,
   order,
+  onSubmitted,
 }: {
   skeleton?: boolean;
   order: OrderResponse;
+  onSubmitted?: () => void;
 }) => {
   const items = order.items?.docs as OrderItemType[];
   const product = items?.[0]?.product as Product;
@@ -175,7 +186,10 @@ const OrderItem = ({
       </ItemContent>
       {order.status === "pending" && (
         <ItemContent>
-          <MemberEditProductOrderPaymentForm order={order} />
+          <MemberEditProductOrderPaymentForm
+            order={order}
+            onSubmitted={() => onSubmitted?.()}
+          />
         </ItemContent>
       )}
       <ItemFooter>

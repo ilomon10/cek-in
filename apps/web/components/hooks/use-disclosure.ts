@@ -8,14 +8,14 @@ export interface UseDisclosureOptions {
 export interface UseDisclosureHandlers {
   open: () => void;
   close: () => void;
-  toggle: () => void;
+  toggle: (state: boolean) => void;
 }
 
 export type UseDisclosureReturnValue = [boolean, UseDisclosureHandlers];
 
 export function useDisclosure(
   initialState = false,
-  options: UseDisclosureOptions = {}
+  options: UseDisclosureOptions = {},
 ): UseDisclosureReturnValue {
   const [opened, setOpened] = useState(initialState);
 
@@ -39,9 +39,16 @@ export function useDisclosure(
     });
   }, [options.onClose]);
 
-  const toggle = useCallback(() => {
-    opened ? close() : open();
-  }, [close, open, opened]);
+  const toggle = useCallback(
+    (state?: boolean) => {
+      if (typeof state !== undefined) {
+        state ? open() : close();
+      } else {
+        opened ? close() : open();
+      }
+    },
+    [close, open, opened],
+  );
 
   return [opened, { open, close, toggle }];
 }

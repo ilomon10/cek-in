@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import type { CollectionConfig } from 'payload'
-import { UnsecuredJWT } from 'jose'
+import { decodeJwt, UnsecuredJWT } from 'jose'
 
 export const Entitlements: CollectionConfig = {
   slug: 'entitlements',
@@ -62,6 +62,19 @@ export const Entitlements: CollectionConfig = {
     },
 
     {
+      name: 'parentId',
+      type: 'relationship',
+      relationTo: 'entitlements',
+      hooks: {
+        beforeChange: [
+          async function ({ siblingData, value }) {
+            return siblingData.id === value ? undefined : value
+          },
+        ],
+      },
+    },
+
+    {
       name: 'qrCode',
       type: 'text',
       hooks: {
@@ -91,13 +104,12 @@ export const Entitlements: CollectionConfig = {
               product: {
                 type: product.productType,
               },
-              exp: dayjs(siblingData.endAt).unix(),
             }
-            const jwt = new UnsecuredJWT(data).encode()
-            const jwtDecoded = UnsecuredJWT.decode(jwt)
+            const jwt = new UnsecuredJWT(data)
+              .setIssuedAt()
+              .setExpirationTime(dayjs(siblingData.endAt).unix())
+              .encode()
 
-            console.log('QRCode CREATED', jwt)
-            console.log('QRCode DECODED', jwtDecoded)
             return jwt
           },
         ],

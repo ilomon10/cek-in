@@ -1,8 +1,7 @@
-import { OrderItem } from '@/payload-types'
-import { generateId } from '@/utils/generate-id'
-import { generateSimpleHash } from '@/utils/generate-simple-hash'
+import { fullfillOrder } from '@/services/entitlement.service/fulfillment-order'
+import { createPayment } from '@/services/payment.service/create-payment'
 import { APIError, Endpoint } from 'payload'
-import z from 'zod'
+import z, { ZodError } from 'zod'
 
 const schema = z
   .object({
@@ -23,8 +22,6 @@ const schema = z
     },
   )
 
-const bb = 'A'
-
 const paramsSchema = z.object({
   id: z.coerce.number(),
 })
@@ -37,112 +34,43 @@ const OrderPayHandler: Omit<Endpoint, 'root'> = {
       return Response.json({ error: 'forbidden' }, { status: 403 })
     }
 
-    const params = paramsSchema.parse(req.routeParams)
-    const orderId = params.id
-    const raw = await req.json?.()
-    const data = schema.parse(raw)
+    try {
+      const params = paramsSchema.parse(req.routeParams)
+      const orderId = params.id
+      const raw = await req.json?.()
+      const data = schema.parse(raw)
 
-    const payment = await req.payload.create({
-      collection: 'payments',
-      data: {
+      const {
+        url,
+        entity: { payment },
+      } = await createPayment(req, {
         method: data.method || 'other',
-        order: orderId,
-        status: data.paid ? 'paid' : 'waiting',
-      },
-    })
-
-    if (data.paid) {
-      const order = await req.payload.update({
-        collection: 'orders',
-        id: orderId,
-        data: {
-          status: 'paid',
-        },
-        depth: 1,
+        orderId: orderId,
       })
-      const items = order.items as OrderItem[]
-      for (const item of items) {
-        await req.payload.create({
-          collection: 'entitlements',
-          data: {
-            tenant: order.tenant as number,
-            customer: order.customer as number,
-            orderItem: item.id,
-            product: item.product as number,
-            status: 'active',
-          },
-        })
+
+      if (data.paid) {
+        await fullfillOrder(req, { orderId })
+      }
+
+      return Response.json({
+        status: 'OK',
+        message: 'Payment was Created',
+        data: {
+          // url,
+          paymentId: payment.id,
+        },
+      })
+    } catch (err) {
+      console.error(err)
+      if (err instanceof ZodError) {
+        throw new APIError('Bad Request.', 400, err.issues)
+      } else if (err instanceof Error) {
+        throw new APIError(err.message)
+      } else {
+        throw new APIError('Something went wrong', 500)
       }
     }
-
-    return Response.json({
-      status: 'OK',
-      message: 'Payment Created',
-      payment,
-    })
   },
 }
 
 export default OrderPayHandler
-
-// {
-//         async onSettled(data) {
-//           if (data?.data) {
-//             const customer = data.data as unknown as Customer;
-//             console.log("customer", customer);
-//             const reqOrder = await dataProvider().create({
-//               resource: "orders",
-//               variables: {
-//                 tenant: tenant.id,
-//                 customer: customer.id,
-//                 status: values.payment.paid ? "paid" : "pending",
-//               },
-//             });
-//             const reqOrderItem = await dataProvider().create({
-//               resource: "order-items",
-//               variables: {
-//                 tenant: tenant.id,
-//                 order: reqOrder.data.id,
-//                 product: product.id,
-//                 quantity: 1,
-//                 price: product.price,
-//               },
-//             });
-
-//             if (values.payment.paid) {
-//               await dataProvider().create({
-//                 resource: "entitlements",
-//                 variables: {
-//                   tenant: tenant.id,
-//                   customer: customer.id,
-//                   product: product.id,
-//                   orderItem: reqOrderItem.data.id,
-//                   startAt: dayjs(values.startDate, "DD/MM/YYYY").toISOString(),
-//                   endAt: dayjs(values.endDate, "DD/MM/YYYY").toISOString(),
-//                   status: "active",
-//                 },
-//               });
-
-//               await dataProvider().create({
-//                 resource: "payments",
-//                 variables: {
-//                   order: reqOrder.data.id,
-//                   method: values.payment.method,
-//                   status: "paid",
-//                   paidAt: new Date().toISOString(),
-//                 },
-//               });
-//             } else {
-//               await dataProvider().create({
-//                 resource: "payments",
-//                 variables: {
-//                   order: reqOrder.data.id,
-//                   method: values.payment.method,
-//                   status: "waiting",
-//                 },
-//               });
-//             }
-//             router.replace(`/orgs/${tenantId}/members/edit/${customer.id}`);
-//           }
-//         },
-//       },

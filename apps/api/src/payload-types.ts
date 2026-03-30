@@ -514,6 +514,7 @@ export interface Entitlement {
   endAt?: string | null;
   remainingQuota?: number | null;
   status: 'active' | 'expired' | 'used_up' | 'cancelled';
+  parentId?: (number | null) | Entitlement;
   qrCode?: string | null;
   meta?:
     | {
@@ -1130,6 +1131,7 @@ export interface EntitlementsSelect<T extends boolean = true> {
   endAt?: T;
   remainingQuota?: T;
   status?: T;
+  parentId?: T;
   qrCode?: T;
   meta?: T;
   productType?: T;

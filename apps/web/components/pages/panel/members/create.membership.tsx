@@ -115,9 +115,11 @@ export default function MemberCreateMembershipForm({
         values: result,
       },
       {
-        async onSettled(_data, error, variables, onMutateResult, context) {
-          const { data } = _data as CustomResponse;
-          const payment = await dataProvider().custom?.({
+        async onSettled(_data) {
+          const {
+            data: { data },
+          } = _data as CustomResponse;
+          await dataProvider().custom?.({
             method: "post",
             url: `/orders/${data.orderId}/pay`,
             payload: {
@@ -125,7 +127,7 @@ export default function MemberCreateMembershipForm({
               paid: values.payment.paid,
             },
           });
-          console.log(data.orderId, payment);
+          router.replace(`/orgs/${tenantId}/members/edit/${data.customerId}`);
         },
       },
     );

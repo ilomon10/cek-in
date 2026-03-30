@@ -22,21 +22,27 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { dataProvider } from "@/components/providers/data-provider";
 import { useTenant, useWithTenant } from "@/components/hooks/use-tenant";
 import { OrderResponse } from "./edit.products.orders";
+import { useRouter } from "next/navigation";
+import { useDisclosure } from "@/components/hooks/use-disclosure";
 
 export default function MemberEditProductOrderPaymentForm({
   order,
+  onSubmitted,
 }: {
   order: OrderResponse;
+  onSubmitted: () => void;
 }) {
+  const [isOpen, { close, toggle }] = useDisclosure(false);
+
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={toggle}>
       <DialogTrigger asChild={true}>
         <Button type="button">
           <DollarSignIcon /> Pay Now
         </Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogForm order={order} />
+        <DialogForm order={order} onSubmitted={onSubmitted} onClose={close} />
       </DialogContent>
     </Dialog>
   );
@@ -49,8 +55,15 @@ const formSchema = z.object({
 
 type FormSchemaType = z.infer<typeof formSchema>;
 
-const DialogForm = ({ order }: { order: OrderResponse }) => {
-  const tenant = useWithTenant();
+const DialogForm = ({
+  order,
+  onClose,
+  onSubmitted,
+}: {
+  order: OrderResponse;
+  onSubmitted: () => void;
+  onClose: () => void;
+}) => {
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -60,28 +73,16 @@ const DialogForm = ({ order }: { order: OrderResponse }) => {
   const periods = form.watch("periods");
   const handleSubmit: SubmitHandler<FormSchemaType> = async (values) => {
     console.log(values);
-    await dataProvider().create({
-      resource: "entitlements",
-      variables: {
-        tenant: (order.tenant as Tenant).id as number,
-        customer: (order.customer as Customer).id as number,
-        product: product.id,
-        orderItem: reqOrderItem.data.id,
-        startAt: dayjs(values.startDate, "DD/MM/YYYY").toISOString(),
-        endAt: dayjs(values.endDate, "DD/MM/YYYY").toISOString(),
-        status: "active",
+    await dataProvider().custom?.({
+      method: "post",
+      url: `/orders/${order.id}/pay`,
+      payload: {
+        method: values.method,
+        paid: true,
       },
     });
-
-    await dataProvider().create({
-      resource: "payments",
-      variables: {
-        order: reqOrder.data.id,
-        method: values.payment.method,
-        status: "paid",
-        paidAt: new Date().toISOString(),
-      },
-    });
+    onSubmitted();
+    onClose();
   };
   return (
     <Form {...form}>

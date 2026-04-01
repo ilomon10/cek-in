@@ -40,7 +40,7 @@ import { useForm } from "react-hook-form";
 import z from "zod";
 import { FormInput } from "../form-input";
 import { dataProvider } from "@/components/providers/data-provider";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Spinner } from "@repo/ui/components/ui/spinner";
 import { UndangonLogo } from "../../welcome/header";
 
@@ -57,6 +57,7 @@ export const InvoicePayment: FC<{
   order: Order;
   items: OrderItem[];
 }> = (props) => {
+  const { tenantId } = useParams<{ tenantId: string }>();
   const form = useForm({ resolver: zodResolver(schema) });
 
   const { tenant, customer, payment, order, items } = props;
@@ -81,7 +82,7 @@ export const InvoicePayment: FC<{
         paid: true,
       },
     });
-    router.replace(`/orgs/${tenant.id}/members/edit/${customer.id}`);
+    router.replace(`/orgs/${tenantId}/members/edit/${customer.id}`);
   };
 
   return (

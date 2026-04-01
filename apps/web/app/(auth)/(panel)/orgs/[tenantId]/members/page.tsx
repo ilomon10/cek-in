@@ -18,8 +18,10 @@ import { Badge } from "@repo/ui/components/ui/badge";
 import { cn } from "@repo/ui/lib/utils";
 import { Button } from "@repo/ui/components/ui/button";
 import { DollarSignIcon } from "lucide-react";
+import { useParams } from "next/navigation";
 
 export default function MemberList() {
+  const { tenantId } = useParams<{ tenantId: string }>();
   const tenant = useWithTenant();
   const columns = useMemo<ColumnDef<Customer>[]>(
     () => [
@@ -28,7 +30,8 @@ export default function MemberList() {
         id: "id",
         accessorKey: "id", // Maps to the 'id' field in your data
         header: "#",
-        maxSize: 40,
+        minSize: 32,
+        maxSize: 32,
       },
       {
         id: "name",
@@ -88,32 +91,23 @@ export default function MemberList() {
         ),
         cell: (props) => {
           const customer = props.row.original;
-          const product = customer.member;
-          const orderId = customer.member?.orderId;
-          const status = product?.status;
+          const member = customer.member;
+          const status = member?.status;
 
-          if (!product) return null;
+          if (!member) return null;
 
           return (
             <div className="flex gap-2 items-center">
-              <div className="text-sm">{product?.name}</div>
+              <div className="text-sm">{member?.name}</div>
               <Badge
                 variant={"outline"}
                 className={cn(
-                  status === "paid" && "text-green-500",
-                  status === "waiting" && "text-orange-500",
+                  status === "active" && "text-green-500 border-green-500",
+                  status === "waiting" && "text-orange-500 border-orange-500",
                 )}
               >
                 {status}
               </Badge>
-              {status === "waiting" && (
-                <Button size={"xs"} asChild={true}>
-                  <Link href={`/orgs/${tenant.id}/invoices/${orderId}/pay`}>
-                    <DollarSignIcon />
-                    Pay Now
-                  </Link>
-                </Button>
-              )}
             </div>
           );
         },
@@ -125,8 +119,22 @@ export default function MemberList() {
         header: "Valid until",
         cell(props) {
           const customer = props.row.original;
-          const entitlement = customer.member as Entitlement | undefined;
-          return dayjs(entitlement?.endAt).format("MMM DD, YYYY");
+          const member = customer.member;
+          if (member?.endAt) {
+            return dayjs(member?.endAt).format("MMM DD, YYYY");
+          }
+          return (
+            member?.status === "waiting" && (
+              <Button size={"xs"} asChild={true}>
+                <Link
+                  href={`/orgs/${tenantId}/invoices/${member?.orderId}/pay`}
+                >
+                  <DollarSignIcon />
+                  Pay Now
+                </Link>
+              </Button>
+            )
+          );
         },
       },
     ],

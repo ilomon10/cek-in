@@ -2,15 +2,21 @@ import { DataProvider } from "@refinedev/core";
 import { convertRefineSortToPayload } from "./query-converter/sort";
 import { convertRefineFilterToPayload } from "./query-converter/filter";
 import { serverSideClientSDK } from "./server-side-client-sdk";
+import { cookies } from "next/headers";
 // import { useLocalStorage } from "../hooks/use-local-storage";
 
-export const serverDataProvider = (): DataProvider => {
+export const serverDataProvider = (args?: {
+  config?: RequestInit;
+}): DataProvider => {
   const client = serverSideClientSDK();
   const token = "0021e99a-1540-4a6e-bff7-065ae34a6e33";
+
   const config: RequestInit = {
     // credentials: "include",
     headers: { Authorization: `users API-Key ${token}` },
+    ...args?.config,
   };
+
   return {
     create: async (props) => {
       const resource = props.resource as any;
@@ -23,7 +29,7 @@ export const serverDataProvider = (): DataProvider => {
           data: values,
           file,
         },
-        config
+        config,
       );
       return res;
     },
@@ -39,7 +45,7 @@ export const serverDataProvider = (): DataProvider => {
           data: values,
           file,
         },
-        config
+        config,
       );
       return res;
     },
@@ -50,7 +56,7 @@ export const serverDataProvider = (): DataProvider => {
           collection: resource,
           id: props.id,
         },
-        config
+        config,
       );
       return { data: res };
     },
@@ -73,7 +79,7 @@ export const serverDataProvider = (): DataProvider => {
             select: select as any,
             depth,
           },
-          config
+          config,
         );
         result.data = res.docs[0];
       } else {
@@ -84,7 +90,7 @@ export const serverDataProvider = (): DataProvider => {
             select: select as any,
             depth,
           },
-          config
+          config,
         );
         result.data = res;
       }
@@ -103,7 +109,7 @@ export const serverDataProvider = (): DataProvider => {
           select: select as any,
           depth,
         },
-        config
+        config,
       );
       return {
         data: res.docs,

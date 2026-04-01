@@ -134,7 +134,7 @@ export function Header() {
 export function UndangonLogo() {
   return (
     <div>
-      <img className="size-10" src={"logo.svg"} />
+      <img className="size-10" src={"/logo.svg"} />
     </div>
   );
 }

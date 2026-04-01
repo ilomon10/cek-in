@@ -1,4 +1,3 @@
-import { User } from '@/payload-types'
 import type { CollectionConfig, FieldAccess } from 'payload'
 import { adminFieldAccess, userAccessCreate, userAccessRead } from './Users.access'
 
@@ -15,6 +14,9 @@ export const Users: CollectionConfig = {
       allowEmailLogin: true,
       requireEmail: true,
     },
+    // cookies: {
+    //   sameSite: 'None',
+    // },
   },
   access: {
     create: () => true,

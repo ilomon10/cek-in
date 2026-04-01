@@ -16,6 +16,7 @@ import { Button } from "@repo/ui/components/ui/button";
 import { Separator } from "@repo/ui/components/ui/separator";
 import MemberEditProductsForm from "./edit.products";
 import MemberEditProductsOrdersForm from "./edit.products.orders";
+import { PHONE_MASK } from "@/components/constants";
 
 export const memberSchema = z.object({
   id: z.number(),
@@ -57,8 +58,6 @@ export default function MemberEditForm() {
     },
   });
 
-  const memberId = form.watch("id");
-
   const handleSubmit = (values: MemberFormInputData) => {
     console.log(values);
     const result = {
@@ -98,12 +97,7 @@ export default function MemberEditForm() {
                 className="w-1/2"
                 placeholder="Enter phone number"
                 mask={{
-                  mask: [
-                    "+00 000-000-000",
-                    "+00 000-0000-0000",
-                    "+00 000-0000-00000",
-                    "+00 000-00000-00000",
-                  ],
+                  mask: PHONE_MASK,
                 }}
                 description="Example: +62 (Indonesia), +81 (Japan), +1 (USA), +44 (UK)"
               />

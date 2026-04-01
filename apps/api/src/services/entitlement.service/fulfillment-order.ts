@@ -6,6 +6,7 @@ import dayjs from 'dayjs'
 
 type Data = {
   orderId: number
+  paymentId: number
 }
 
 type FullfillOrderEntity = {
@@ -36,12 +37,20 @@ export const fullfillOrder: FullfillOrderService = async (req, data) => {
   })
 
   await payload.update({
+    collection: 'payments',
+    id: data.paymentId,
+    data: {
+      status: 'paid',
+    },
+    depth: 0,
+  })
+  await payload.update({
     collection: 'orders',
     id: data.orderId,
     data: {
       status: 'paid',
     },
-    depth: 1,
+    depth: 0,
   })
   console.log('fulfillOrder', order)
 

@@ -37,6 +37,14 @@ export const OrderItems: CollectionConfig = {
       },
     },
     {
+      name: 'productType',
+      type: 'text',
+      virtual: 'product.productType',
+      admin: {
+        readOnly: true,
+      },
+    },
+    {
       name: 'quantity',
       type: 'number',
       defaultValue: 1,

@@ -11,4 +11,11 @@ export const ROLE_OPTIONS = [
   { label: "Designer", value: "designer" },
 ];
 
-export default { SERVER_URL, APP_NAME, ROLE_OPTIONS };
+export const PHONE_MASK = [
+  "+00 000-000-000",
+  "+00 000-0000-0000",
+  "+00 000-0000-00000",
+  "+00 000-00000-00000",
+];
+
+export default { SERVER_URL, APP_NAME, ROLE_OPTIONS, PHONE_MASK };

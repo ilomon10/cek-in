@@ -71,7 +71,11 @@ export const authProvider = (): AuthProvider => {
             },
             { credentials: "include" },
           )) as LoginResult;
-          if (res.errors) {
+
+          if (res.user === null) {
+            result.success = false;
+            result.error = new Error("No user logged");
+          } else if (res.errors) {
             result.success = false;
             result.error = new Error(res.errors[0]?.message);
           } else {
@@ -102,18 +106,34 @@ export const authProvider = (): AuthProvider => {
       const result: CheckResponse = {
         authenticated: false,
       };
+      let _token = token;
+      let _tokenExpireDate = tokenExpireDate;
 
       try {
         // No token -> not authenticated
-        if (!token) {
+        if (!_token) {
           result.redirectTo = "/login";
           return result;
         }
         const nowSec = Math.floor(Date.now() / 1000);
 
+        const user = await client.me({
+          collection: "users",
+        });
+
+        if (user.token && user.exp) {
+          _token = user.token;
+          _tokenExpireDate = user.exp;
+        }
+        if (user.user === null) {
+          result.redirectTo = "/login";
+          return result;
+        }
+
         // If we don't have an expiry or token is expired (or about to expire), try refresh.
         // Refresh a little earlier (30s) to avoid edge cases.
-        const needsRefresh = !tokenExpireDate || nowSec > tokenExpireDate - 30;
+        const needsRefresh =
+          !_tokenExpireDate || nowSec > _tokenExpireDate - 30;
 
         if (needsRefresh) {
           // Use a global/shared promise to avoid multiple concurrent refresh calls.
@@ -189,6 +209,7 @@ export const authProvider = (): AuthProvider => {
                 email: params.email,
                 username: params.username,
                 password: params.password,
+                isPlatformAdmin: false,
               },
             },
             {

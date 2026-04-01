@@ -4,6 +4,7 @@ import { BaseService } from '../baseService'
 type Data = {
   orderId: number
   method: Payment['method']
+  status?: Payment['status']
 }
 
 type CreatePaymentEntity = {
@@ -20,7 +21,7 @@ export const createPayment: CreatePaymentService = async (req, data) => {
     data: {
       method: data.method,
       order: data.orderId,
-      status: 'waiting',
+      status: data.status || 'waiting',
     },
   })
 

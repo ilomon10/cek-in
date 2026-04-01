@@ -497,6 +497,12 @@ export interface Customer {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  member?: {
+    name?: string | null;
+    status?: string | null;
+    endAt?: string | null;
+    orderId?: number | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -544,6 +550,7 @@ export interface OrderItem {
   product: number | Product;
   invoiceNumber?: string | null;
   productName?: string | null;
+  productType?: string | null;
   quantity?: number | null;
   price?: number | null;
   meta?:
@@ -988,6 +995,14 @@ export interface CustomersSelect<T extends boolean = true> {
   orders?: T;
   subscriptions?: T;
   checkInLogs?: T;
+  member?:
+    | T
+    | {
+        name?: T;
+        status?: T;
+        endAt?: T;
+        orderId?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1111,6 +1126,7 @@ export interface OrderItemsSelect<T extends boolean = true> {
   product?: T;
   invoiceNumber?: T;
   productName?: T;
+  productType?: T;
   quantity?: T;
   price?: T;
   meta?: T;

@@ -49,14 +49,14 @@ const OrderPayHandler: Omit<Endpoint, 'root'> = {
       })
 
       if (data.paid) {
-        await fullfillOrder(req, { orderId })
+        await fullfillOrder(req, { orderId, paymentId: payment.id })
       }
 
       return Response.json({
         status: 'OK',
         message: 'Payment was Created',
         data: {
-          // url,
+          url,
           paymentId: payment.id,
         },
       })

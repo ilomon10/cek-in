@@ -26,6 +26,7 @@ import {
   ContainerIcon,
   CrownIcon,
   DollarSignIcon,
+  EyeIcon,
   ReceiptIcon,
   TicketIcon,
 } from "lucide-react";
@@ -39,6 +40,7 @@ import { cn } from "@repo/ui/lib/utils";
 import { Button } from "@repo/ui/components/ui/button";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import MemberEditProductOrderPaymentForm from "./edit.products.orders.payment";
+import Link from "next/link";
 
 export type OrderResponse = Pick<
   Order,
@@ -135,6 +137,7 @@ const OrderItem = ({
   order: OrderResponse;
   onSubmitted?: () => void;
 }) => {
+  const { tenantId } = useParams<{ tenantId: string }>();
   const items = order.items?.docs as OrderItemType[];
   const product = items?.[0]?.product as Product;
 
@@ -184,14 +187,21 @@ const OrderItem = ({
           </ItemDescription>
         )}
       </ItemContent>
-      {order.status === "pending" && (
-        <ItemContent>
-          <MemberEditProductOrderPaymentForm
-            order={order}
-            onSubmitted={() => onSubmitted?.()}
-          />
-        </ItemContent>
-      )}
+      <ItemContent>
+        <Button type="button" asChild>
+          <Link href={`/orgs/${tenantId}/invoices/${order.id}/pay`}>
+            {order.status === "pending" ? (
+              <>
+                <DollarSignIcon /> Pay Now
+              </>
+            ) : (
+              <>
+                <EyeIcon /> Details
+              </>
+            )}
+          </Link>
+        </Button>
+      </ItemContent>
       <ItemFooter>
         <div className="flex gap-1 items-center text-md text-muted-foreground">
           {/* <ReceiptIcon className="size-5" /> */}

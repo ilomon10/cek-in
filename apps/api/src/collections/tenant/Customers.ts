@@ -1,3 +1,4 @@
+import { Entitlement, Order, OrderItem, Payment, Product } from '@/payload-types'
 import type { CollectionConfig } from 'payload'
 
 export const Customers: CollectionConfig = {
@@ -98,10 +99,133 @@ export const Customers: CollectionConfig = {
         defaultColumns: ['invoiceNumber', 'status', 'items', 'totalAmount'],
       },
     },
+
+    {
+      name: 'member',
+      type: 'group',
+      virtual: true,
+      admin: {
+        readOnly: true,
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+        {
+          name: 'status',
+          type: 'text',
+        },
+        {
+          name: 'endAt',
+          type: 'date',
+        },
+        {
+          name: 'orderId',
+          type: 'number',
+        },
+        // {
+        //   name: 'entitlement',
+        //   type: 'relationship',
+        //   relationTo: 'entitlements',
+        // },
+        // {
+        //   name: 'order',
+        //   type: 'relationship',
+        //   relationTo: 'orders',
+        // },
+        // {
+        //   name: 'orderItem',
+        //   type: 'relationship',
+        //   relationTo: 'order-items',
+        // },
+        // {
+        //   name: 'product',
+        //   type: 'relationship',
+        //   relationTo: 'products',
+        // },
+        // {
+        //   name: 'payment',
+        //   type: 'relationship',
+        //   relationTo: 'payments',
+        // },
+      ],
+      hooks: {
+        beforeValidate: [
+          async function () {
+            return {}
+          },
+        ],
+        afterRead: [
+          async function ({ siblingData, req, operation }) {
+            if (operation === 'read') {
+              const orders = await req.payload.find({
+                collection: 'orders',
+                where: {
+                  and: [
+                    {
+                      customer: {
+                        equals: siblingData.id,
+                      },
+                    },
+                    {
+                      'items.product.productType': {
+                        equals: 'membership',
+                      },
+                    },
+                  ],
+                },
+                depth: 2,
+                populate: {
+                  'order-items': {
+                    entitlements: true,
+                    product: true,
+                    productType: true,
+                  },
+                },
+                select: {
+                  tenant: false,
+                  customer: false,
+                },
+                sort: '-createdAt',
+              })
+              const order = orders.docs[0] as Omit<Order, 'customer'> | undefined
+              const item = (order?.items?.docs as OrderItem[])?.find(
+                ({ productType }) => productType === 'membership',
+              )
+
+              const entitlementId = item?.entitlements?.docs?.[0] as number | undefined
+              let entitlement = undefined
+              if (entitlementId) {
+                entitlement = await req.payload.findByID({
+                  collection: 'entitlements',
+                  id: entitlementId,
+                  depth: 1,
+                  select: {
+                    customer: false,
+                  },
+                })
+              }
+
+              const product = item?.product as Product
+              const payment = order?.payments?.docs?.[0] as Omit<Payment, 'customer'>
+
+              return {
+                name: product?.name,
+                status: entitlement?.status || payment?.status,
+                endAt: entitlement?.endAt,
+                orderId: order?.id,
+              }
+            }
+            return {}
+          },
+        ],
+      },
+    },
   ],
   hooks: {
     beforeDelete: [
-      async ({ id, req, context }) => {
+      async ({ id, req }) => {
         const res = await req.payload.findByID({
           collection: 'customers',
           id: id,
@@ -113,6 +237,7 @@ export const Customers: CollectionConfig = {
           await req.payload.delete({
             collection: 'orders',
             id: id,
+            depth: 0,
           })
         }
 
@@ -122,6 +247,7 @@ export const Customers: CollectionConfig = {
             await req.payload.delete({
               collection: 'entitlements',
               id: id,
+              depth: 0,
             })
           }
         } catch (err) {
@@ -133,6 +259,7 @@ export const Customers: CollectionConfig = {
           await req.payload.delete({
             collection: 'subscriptions',
             id: id,
+            depth: 0,
           })
         }
       },

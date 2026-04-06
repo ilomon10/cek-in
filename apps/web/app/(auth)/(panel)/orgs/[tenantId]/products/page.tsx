@@ -70,6 +70,14 @@ export default function ProductsList() {
         },
       },
       {
+        id: "productType",
+        accessorKey: "productType",
+        header: "Type",
+        cell(props) {
+          return <div className="capitalize">{props.getValue() as string}</div>;
+        },
+      },
+      {
         id: "updatedAt",
         accessorKey: "updatedAt",
         header: "Last Update at",
@@ -85,6 +93,14 @@ export default function ProductsList() {
   const table = useTable<Product>({
     columns,
     refineCoreProps: {
+      sorters: {
+        initial: [
+          {
+            field: "price",
+            order: "asc",
+          },
+        ],
+      },
       filters: {
         initial: [
           {

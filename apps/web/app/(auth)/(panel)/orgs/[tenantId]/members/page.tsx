@@ -17,7 +17,7 @@ import { Avatar, AvatarFallback } from "@repo/ui/components/ui/avatar";
 import { Badge } from "@repo/ui/components/ui/badge";
 import { cn } from "@repo/ui/lib/utils";
 import { Button } from "@repo/ui/components/ui/button";
-import { DollarSignIcon } from "lucide-react";
+import { DollarSignIcon, TimerResetIcon } from "lucide-react";
 import { useParams } from "next/navigation";
 
 export default function MemberList() {
@@ -103,7 +103,8 @@ export default function MemberList() {
                 variant={"outline"}
                 className={cn(
                   status === "active" && "text-green-500 border-green-500",
-                  status === "waiting" && "text-orange-500 border-orange-500",
+                  ["waiting", "expired"].indexOf(status as string) > -1 &&
+                    "text-orange-500 border-orange-500",
                 )}
               >
                 {status}
@@ -120,6 +121,18 @@ export default function MemberList() {
         cell(props) {
           const customer = props.row.original;
           const member = customer.member;
+          if (member?.status === "expired") {
+            return (
+              <Button size={"xs"} asChild={true}>
+                <Link
+                  href={`/orgs/${tenantId}/invoices/${member?.orderId}/pay`}
+                >
+                  <TimerResetIcon />
+                  Renew
+                </Link>
+              </Button>
+            );
+          }
           if (member?.endAt) {
             return dayjs(member?.endAt).format("MMM DD, YYYY");
           }

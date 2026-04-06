@@ -4,6 +4,9 @@ import { decodeJwt, UnsecuredJWT } from 'jose'
 
 export const Entitlements: CollectionConfig = {
   slug: 'entitlements',
+  admin: {
+    useAsTitle: 'productName',
+  },
   fields: [
     {
       name: 'tenant',
@@ -59,6 +62,26 @@ export const Entitlements: CollectionConfig = {
       ],
       required: true,
       defaultValue: 'active',
+      hooks: {
+        // beforeValidate:
+        beforeValidate: [
+          async function ({ siblingData, value }) {
+            if (value === 'cancelled') {
+              return value
+            }
+            const endAt = dayjs(siblingData.endAt)
+            const now = dayjs().endOf('day')
+            const diff = endAt.diff(now, 'day')
+            if (diff < 0) {
+              return 'expired'
+            }
+            if (siblingData.remainingQuota && siblingData.remainingQuota <= 0) {
+              return 'used_up'
+            }
+            return value
+          },
+        ],
+      },
     },
 
     {
@@ -119,6 +142,15 @@ export const Entitlements: CollectionConfig = {
     {
       name: 'meta',
       type: 'json',
+    },
+
+    {
+      name: 'productName',
+      type: 'text',
+      virtual: 'product.name',
+      admin: {
+        readOnly: true,
+      },
     },
 
     {

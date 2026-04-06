@@ -9,6 +9,8 @@ export const Users: CollectionConfig = {
     defaultColumns: ['email', 'username', 'avatarAsset', 'roles'],
   },
   auth: {
+    // tokenExpiration: Seconds * Minutes * Hours * Days
+    tokenExpiration: 60 * 60 * 60 * 24 * 7,
     useAPIKey: true,
     loginWithUsername: {
       allowEmailLogin: true,

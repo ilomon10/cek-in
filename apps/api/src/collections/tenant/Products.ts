@@ -3,6 +3,9 @@ import { productConfigsJSONSchema } from './ProductConfigs.schema'
 
 export const Products: CollectionConfig = {
   slug: 'products',
+  versions: {
+    maxPerDoc: 5,
+  },
   admin: {
     useAsTitle: 'name',
   },

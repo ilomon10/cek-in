@@ -68,6 +68,9 @@ export const Customers: CollectionConfig = {
       type: 'join',
       collection: 'entitlements',
       on: 'customer',
+      admin: {
+        defaultColumns: ['product', 'status', 'remainingQuota'],
+      },
     },
 
     {
@@ -124,31 +127,6 @@ export const Customers: CollectionConfig = {
           name: 'orderId',
           type: 'number',
         },
-        // {
-        //   name: 'entitlement',
-        //   type: 'relationship',
-        //   relationTo: 'entitlements',
-        // },
-        // {
-        //   name: 'order',
-        //   type: 'relationship',
-        //   relationTo: 'orders',
-        // },
-        // {
-        //   name: 'orderItem',
-        //   type: 'relationship',
-        //   relationTo: 'order-items',
-        // },
-        // {
-        //   name: 'product',
-        //   type: 'relationship',
-        //   relationTo: 'products',
-        // },
-        // {
-        //   name: 'payment',
-        //   type: 'relationship',
-        //   relationTo: 'payments',
-        // },
       ],
       hooks: {
         beforeValidate: [
